@@ -92,12 +92,12 @@ components:
           type: string
           minLength: 4
           maxLength: 4
-          pattern: ^[0-9]
+          pattern: ^[0-9]+$
         passportNumber:
           type: string
           minLength: 6
           maxLength: 6
-          pattern: ^[0-9]
+          pattern: ^[0-9]+$
 
     LoanOfferDTO:
       type: object
@@ -151,14 +151,25 @@ components:
       properties:
         amount:
           type: number
+          minimum: 10000
         term:
           type: integer
+          minimum: 6
         firstName:
           type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
         lastName:
           type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
         middleName:
           type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
         gender:
           type: string
           enum:
@@ -170,8 +181,14 @@ components:
           format: date
         passportSeries:
           type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^[0-9]+$
         passportNumber:
           type: string
+          minLength: 6
+          maxLength: 6
+          pattern: ^[0-9]+$
         passportIssueDate:
           type: string
           format: date
@@ -186,7 +203,6 @@ components:
         dependentAmount:
           type: integer
         employment:
-          type: object
           $ref: "#/components/schemas/EmploymentDTO"
         account:
           type: string
@@ -230,9 +246,9 @@ components:
       type: object
       required:
         - employmentStatus
+        - position
         - employerINN
         - salary
-        - position
         - workExperienceTotal
         - workExperienceCurrent
       properties:
@@ -242,6 +258,7 @@ components:
             - unemployed
             - self_employed
             - business_owner
+            - employee
         employerINN:
           type: string
         salary:

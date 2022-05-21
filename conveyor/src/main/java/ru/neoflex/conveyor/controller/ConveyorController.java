@@ -21,11 +21,13 @@ public class ConveyorController implements ConveyorApi {
 
     @Override
     public ResponseEntity<List<LoanOfferDTO>> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+        log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return ResponseEntity.ok(conveyorService.calculateCreditOffers(loanApplicationRequestDTO));
     }
 
     @Override
     public ResponseEntity<CreditDTO> calculateCreditParameters(ScoringDataDTO scoringDataDTO) {
+        log.info("calculateCreditParameters(), scoringDataDTO = {}", scoringDataDTO);
         return ResponseEntity.ok(conveyorService.calculateCreditParameters(scoringDataDTO));
     }
 }
