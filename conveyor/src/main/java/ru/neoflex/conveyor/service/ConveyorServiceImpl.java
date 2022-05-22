@@ -10,10 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,6 +19,8 @@ import java.util.stream.Collectors;
 public class ConveyorServiceImpl implements ConveyorService{
     @Value("${application.rate}")
     private BigDecimal baseRate;
+    @Value("${application.insurance}")
+    private BigDecimal insuranceCost;
 
     @Override
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
@@ -129,11 +128,11 @@ public class ConveyorServiceImpl implements ConveyorService{
             tempRate = tempRate.add(BigDecimal.valueOf(3));
             log.info("calculateCreditRate(), ставка увеличивается на 3 для владельца бизнеса, tempRate = {}", tempRate);
         }
-        if (dto.getEmployment().getPosition().equals(EmploymentDTO.PositionEnum.MIDDLE_MANAGER)){
+        if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.MIDDLE_MANAGER)){
             tempRate = tempRate.subtract(BigDecimal.valueOf(2));
             log.info("calculateCreditRate(), ставка уменьшается на 2 для менеджера среднего звена, tempRate = {}", tempRate);
         }
-        if (dto.getEmployment().getPosition().equals(EmploymentDTO.PositionEnum.TOP_MANAGER)){
+        if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.TOP_MANAGER)){
             tempRate = tempRate.subtract(BigDecimal.valueOf(4));
             log.info("calculateCreditRate(), ставка уменьшается на 4 для топ-менеджера, tempRate = {}", tempRate);
         }
@@ -197,9 +196,9 @@ public class ConveyorServiceImpl implements ConveyorService{
         BigDecimal totalAmount;
         log.info("calculateTotalAmount(), создана переменная totalAmount");
         if (isInsuranceEnabled){
-            totalAmount = amount.add(calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term)))
-                    .add(amount.multiply(BigDecimal.valueOf(0.02)));
-        } else totalAmount = amount.add(calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term)));
+            totalAmount = calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term))
+                    .add(amount.multiply(insuranceCost));
+        } else totalAmount = calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term));
         log.info("calculateTotalAmount(), return totalAmount = {}", totalAmount);
         return totalAmount;
     }
@@ -243,7 +242,7 @@ public class ConveyorServiceImpl implements ConveyorService{
             listPayments.add(PaymentScheduleElement.builder()
                     .number(0)
                     .date(LocalDate.now())
-                    .totalPayment(amount.multiply(BigDecimal.valueOf(0.02)))
+                    .totalPayment(amount.multiply(insuranceCost))
                     .interestPayment(BigDecimal.valueOf(0))
                     .debtPayment(BigDecimal.valueOf(0))
                     .remainingDebt(amount)
@@ -274,7 +273,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         listPayments.add(PaymentScheduleElement.builder()
                 .number(term)
                 .date(LocalDate.now().plusMonths(term))
-                .totalPayment(listPayments.get(term - 1).getRemainingDebt().add(listPayments.get(term - 1).getRemainingDebt().multiply(monthlyRate)))
+                .totalPayment(listPayments.get(term - 1).getRemainingDebt().add(listPayments.get(term - 1).getRemainingDebt().multiply(monthlyRate)).setScale(2, RoundingMode.HALF_UP))
                 .interestPayment(listPayments.get(term - 1).getRemainingDebt().multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP))
                 .debtPayment(listPayments.get(term - 1).getRemainingDebt().setScale(2, RoundingMode.HALF_UP))
                 .remainingDebt(BigDecimal.valueOf(0))
@@ -284,7 +283,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         return listPayments;
     }
 
-    public static BigDecimal calculatePsk(BigDecimal amount, List<PaymentScheduleElement> listPaymentScheduleElements) {
+    private BigDecimal calculatePsk(BigDecimal amount, List<PaymentScheduleElement> listPaymentScheduleElements) {
         List<BigDecimal> listTotalPayments = listPaymentScheduleElements.stream().map(PaymentScheduleElement::getTotalPayment).toList();
         BigDecimal i = BigDecimal.ZERO;
         BigDecimal d = BigDecimal.valueOf(0.1);
@@ -311,9 +310,8 @@ public class ConveyorServiceImpl implements ConveyorService{
         }
         log.info("calculatePsk(), расчитали значение i (составляющая формулы psk), i = {}", i);
 
-        BigDecimal psk = i.multiply(BigDecimal.valueOf(12)).multiply(BigDecimal.valueOf(100)).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal psk = i.multiply(BigDecimal.valueOf(365).divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP)).multiply(BigDecimal.valueOf(100)).setScale(3, RoundingMode.HALF_UP);
         log.info("calculatePsk(), расчитали значение psk, return psk = {}", psk);
         return psk;
     }
-
 }

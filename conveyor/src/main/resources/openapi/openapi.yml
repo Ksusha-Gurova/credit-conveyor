@@ -246,7 +246,6 @@ components:
       type: object
       required:
         - employmentStatus
-        - position
         - employerINN
         - salary
         - workExperienceTotal
