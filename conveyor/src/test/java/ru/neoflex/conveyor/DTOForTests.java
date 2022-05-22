@@ -1,4 +1,4 @@
-package ru.neoflex.conveyor.service;
+package ru.neoflex.conveyor;
 
 import org.openapitools.model.*;
 
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class DTOForTests {
-    static final LoanApplicationRequestDTO loanApplicationRequestDTO1 =
+    public static final LoanApplicationRequestDTO loanApplicationRequestDTO1 =
             LoanApplicationRequestDTO.builder()
             .amount(BigDecimal.valueOf(100000))
             .term(6)
@@ -20,7 +20,7 @@ public class DTOForTests {
             .passportSeries("1111")
             .passportNumber("666666")
             .build();
-    static final LoanApplicationRequestDTO loanApplicationRequestDTO2 =
+    public static final LoanApplicationRequestDTO loanApplicationRequestDTO2 =
             LoanApplicationRequestDTO.builder()
                     .amount(BigDecimal.valueOf(100000))
                     .term(6)
@@ -32,7 +32,7 @@ public class DTOForTests {
                     .passportSeries("1111")
                     .passportNumber("666666")
                     .build();
-    static final ScoringDataDTO scoringDataDTO1 =
+    public static final ScoringDataDTO scoringDataDTO1 =
             ScoringDataDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -57,7 +57,7 @@ public class DTOForTests {
                     .isInsuranceEnabled(true)
                     .isSalaryClient(true)
                     .build();
-    static final ScoringDataDTO scoringDataDTO2 =
+    public static final ScoringDataDTO scoringDataDTO2 =
             ScoringDataDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -82,7 +82,7 @@ public class DTOForTests {
                     .isInsuranceEnabled(false)
                     .isSalaryClient(true)
                     .build();
-    static final CreditDTO creditDTO1 =
+    public static final CreditDTO creditDTO1 =
             CreditDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -150,7 +150,7 @@ public class DTOForTests {
                                     .build()
                     ))
                     .build();
-    static final CreditDTO creditDTO2 =
+    public static final CreditDTO creditDTO2 =
             CreditDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -218,7 +218,7 @@ public class DTOForTests {
                                     .build()
                     ))
                     .build();
-    static final List<LoanOfferDTO> loanOfferDTOList1 = List.of(
+    public static final List<LoanOfferDTO> loanOfferDTOList1 = List.of(
                     LoanOfferDTO.builder()
                             .applicationId(4L)
                             .requestedAmount(BigDecimal.valueOf(100000))

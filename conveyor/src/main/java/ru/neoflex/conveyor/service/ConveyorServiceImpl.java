@@ -27,7 +27,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
 
         if (ChronoUnit.YEARS.between(loanApplicationRequestDTO.getBirthdate(), LocalDate.now()) < 18){
-            log.info("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка откланяется");
+            log.info("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка отклоняется");
             throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
         }
 

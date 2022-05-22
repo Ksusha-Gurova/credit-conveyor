@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.neoflex.conveyor.DTOForTests;
 
 import java.math.BigDecimal;
 
@@ -37,8 +38,6 @@ class ConveyorServiceImplTest {
     @Test
     void calculateCreditOffersShouldThrowNullPointerException() {
         assertThrows(NullPointerException.class, () -> conveyorService.calculateCreditOffers(null));
-        DTOForTests.loanApplicationRequestDTO1.setAmount(null);
-        assertThrows(NullPointerException.class, () -> conveyorService.calculateCreditOffers(DTOForTests.loanApplicationRequestDTO1));
     }
 
     @Test
