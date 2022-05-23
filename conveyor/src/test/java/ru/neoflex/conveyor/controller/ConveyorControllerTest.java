@@ -35,9 +35,9 @@ class ConveyorControllerTest {
     void calculateCreditOffersShouldReturnDtoListAndStatus200Test() {
         mockMvc.perform(post("/conveyor/offers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTO1)))
+                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTOCorrect)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.loanOfferDTOList1)));
+                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.loanOfferDTOListFromLoanApplicationRequestDTOCorrect)));
     }
 
     @Test
@@ -45,7 +45,7 @@ class ConveyorControllerTest {
     void calculateCreditOffersShouldReturnDtoListAndStatus200Test2() {
         mockMvc.perform(post("/conveyor/offers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTO2)))
+                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTOWrongAge)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -54,14 +54,14 @@ class ConveyorControllerTest {
     void calculateCreditParametersShouldReturnCreditDtoAndStatus200Test() {
         mockMvc.perform(post("/conveyor/calculation")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTO1)))
+                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTO1)));
+                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)));
 
         mockMvc.perform(post("/conveyor/calculation")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTO2)))
+                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTO2)));
+                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)));
     }
 }

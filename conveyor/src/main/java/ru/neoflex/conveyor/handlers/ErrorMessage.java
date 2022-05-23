@@ -1,4 +1,4 @@
-package ru.neoflex.conveyor.exceptionHandler;
+package ru.neoflex.conveyor.handlers;
 
 import lombok.Builder;
 import lombok.Getter;

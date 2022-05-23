@@ -11,12 +11,19 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class ConveyorServiceImpl implements ConveyorService{
+
+    private static final Integer PRESCORING_MATURITY_AGE = 18;
+    private static final Integer SCORING_MIN_AGE = 20;
+    private static final Integer SCORING_MAX_AGE = 60;
+    private static final BigDecimal MAX_SALARY_MULTIPLIER = BigDecimal.valueOf(20);
+    private static final Integer MIN_WORK_EXPERIENCE_TOTAL = 12;
+    private static final Integer MIN_WORK_EXPERIENCE_CURRENT = 3;
+
     @Value("${application.rate}")
     private BigDecimal baseRate;
     @Value("${application.insurance}")
@@ -26,7 +33,7 @@ public class ConveyorServiceImpl implements ConveyorService{
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
         log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
 
-        if (ChronoUnit.YEARS.between(loanApplicationRequestDTO.getBirthdate(), LocalDate.now()) < 18){
+        if (ChronoUnit.YEARS.between(loanApplicationRequestDTO.getBirthdate(), LocalDate.now()) < PRESCORING_MATURITY_AGE){
             log.info("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка отклоняется");
             throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
         }
@@ -46,7 +53,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         List<LoanOfferDTO> loanOffers = Arrays.asList(insuranceTrueSalaryTrue, insuranceTrueSalaryFalse, insuranceFalseSalaryTrue, insuranceFalseSalaryFalse);
         log.info("calculateCreditOffers(), создали список со всеми ранее инициализированными предложениями, loanOffers = {}", loanOffers);
 
-        loanOffers = loanOffers.stream().sorted(Comparator.comparing(LoanOfferDTO::getRate).reversed()).collect(Collectors.toList());
+        loanOffers = loanOffers.stream().sorted(Comparator.comparing(LoanOfferDTO::getRate).reversed()).toList();
         log.info("calculateCreditOffers(), отсортировали список с предложениями (от хкдшего к лучшему) по ставке, return loanOffers = {}", loanOffers);
 
         return loanOffers;
@@ -56,30 +63,43 @@ public class ConveyorServiceImpl implements ConveyorService{
     public CreditDTO calculateCreditParameters(ScoringDataDTO scoringDataDTO) {
         log.info("calculateCreditParameters(), scoringDataDTO = {}", scoringDataDTO);
 
+        List<String> creditDeclineMessagesList = new ArrayList<>();
+
         if (scoringDataDTO.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED)){
             log.info("calculateCreditParameters(), из-за рабочего статуса - безработный в кредите отказано");
-            throw new IllegalArgumentException("В кредите отказано");
+            creditDeclineMessagesList.add("Ваш рабочий статус: безработный");
         }
-        if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).compareTo(scoringDataDTO.getAmount()) < 0){
+        if (scoringDataDTO.getEmployment().getSalary().multiply(MAX_SALARY_MULTIPLIER).compareTo(scoringDataDTO.getAmount()) < 0){
             log.info("calculateCreditParameters(), из-за размера кредите превышающего 20 зарплат в кредите отказано");
-            throw new IllegalArgumentException("В кредите отказано");
+            creditDeclineMessagesList.add("Запрашиваемая сумма больше 20-и зарплат");
         }
-        if (ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) < 20 || ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) > 60){
+        if (ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) < SCORING_MIN_AGE
+                || ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) > SCORING_MAX_AGE){
             log.info("calculateCreditParameters(), из-за возраста равного менее 20 или более 60 в кредите отказано");
-            throw new IllegalArgumentException("В кредите отказано");
+            creditDeclineMessagesList.add("Ваш возраст менее 20-и или более 60-и");
         }
-        if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12
-                || scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3){
+        if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < MIN_WORK_EXPERIENCE_TOTAL
+                || scoringDataDTO.getEmployment().getWorkExperienceCurrent() < MIN_WORK_EXPERIENCE_CURRENT){
             log.info("calculateCreditParameters(), из-за общего стажа работы равного менее 12 месяцам или текущего стажа работы равного менее 3 месяцам в кредите отказано");
-            throw new IllegalArgumentException("В кредите отказано");
+            creditDeclineMessagesList.add("Ваш общий стаж работы менее 12-и месяцев и/или текущий стаж работы менее 3-х месяцев");
         }
+        if (!creditDeclineMessagesList.isEmpty()){
+            throw new IllegalArgumentException("Ваша заявка не может быть одобрена по следующим причинам: " +
+                    String.join(", ", creditDeclineMessagesList));
+        }
+
         BigDecimal rate = calculateCreditRate(scoringDataDTO);
         log.info("calculateCreditParameters(), расчитали процентную ставку по кредиту, rate = {}", rate);
 
         BigDecimal monthlyPayment = calculateMonthlyPayment(scoringDataDTO.getAmount(), rate, scoringDataDTO.getTerm());
         log.info("calculateCreditParameters(), расчитали ежемесячный платеж, monthlyPayment = {}", monthlyPayment);
 
-        List<PaymentScheduleElement> paymentScheduleElements = calculatePaymentScheduleElement(scoringDataDTO.getAmount(),monthlyPayment, rate, scoringDataDTO.getTerm(), scoringDataDTO.getIsInsuranceEnabled());
+        List<PaymentScheduleElement> paymentScheduleElements = calculatePaymentScheduleElement(
+                scoringDataDTO.getAmount(),
+                monthlyPayment,
+                rate,
+                scoringDataDTO.getTerm(),
+                scoringDataDTO.getIsInsuranceEnabled());
         log.info("calculateCreditParameters(), создан список ежемесячных платежей, paymentScheduleElements = {}", paymentScheduleElements);
 
         CreditDTO creditDTO = CreditDTO.builder()
@@ -97,7 +117,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         return creditDTO;
     }
 
-    private BigDecimal calculateCreditRate(Boolean isInsuranceEnabled, Boolean isSalaryClient){
+    private BigDecimal calculateCreditRate(boolean isInsuranceEnabled, boolean isSalaryClient){
         log.info("calculateCreditRate(), isInsuranceEnabled = {}, isSalaryClient = {}", isInsuranceEnabled, isSalaryClient);
 
         BigDecimal tempRate = baseRate;
@@ -178,6 +198,7 @@ public class ConveyorServiceImpl implements ConveyorService{
 
     private BigDecimal calculateMonthlyPayment(BigDecimal amount, BigDecimal rate, Integer term){
         log.info("calculateMonthlyPayment(), amount = {}, rate = {}, term = {}", amount, rate, term);
+        //Ссылка на источник с формулой расчета ежемесячного платежа https://journal.tinkoff.ru/guide/credit-payment/
         //monthlyPayment = amount * (rate/100/12 * (1 + rate/100/12)^term) / ((1 + rate/100/12)^term - 1)
         //                           monthlyRate      coefficientPart1                  coefficientPart3
         //                                  coefficientPart2        coefficientPart4
@@ -191,14 +212,18 @@ public class ConveyorServiceImpl implements ConveyorService{
         return monthlyPayment;
     }
 
-    private BigDecimal calculateTotalAmount(BigDecimal amount, BigDecimal rate, Integer term, Boolean isInsuranceEnabled){
+    private BigDecimal calculateTotalAmount(BigDecimal amount, BigDecimal rate, Integer term, boolean isInsuranceEnabled){
         log.info("calculateTotalAmount(), amount = {}, rate = {}, term = {}, isInsuranceEnabled = {}", amount, rate, term, isInsuranceEnabled);
         BigDecimal totalAmount;
         log.info("calculateTotalAmount(), создана переменная totalAmount");
         if (isInsuranceEnabled){
-            totalAmount = calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term))
-                    .add(amount.multiply(insuranceCost));
-        } else totalAmount = calculateMonthlyPayment(amount, rate, term).multiply(BigDecimal.valueOf(term));
+            totalAmount =
+                    calculateMonthlyPayment(amount, rate, term)
+                            .multiply(BigDecimal.valueOf(term))
+                            .add(amount.multiply(insuranceCost));
+        } else totalAmount =
+                calculateMonthlyPayment(amount, rate, term)
+                        .multiply(BigDecimal.valueOf(term));
         log.info("calculateTotalAmount(), return totalAmount = {}", totalAmount);
         return totalAmount;
     }
@@ -230,7 +255,7 @@ public class ConveyorServiceImpl implements ConveyorService{
             BigDecimal monthlyPayment,
             BigDecimal rate,
             Integer term,
-            Boolean isInsuranceEnabled){
+            boolean isInsuranceEnabled){
         log.info("calculatePaymentScheduleElement(), amount = {}, monthlyPayment = {}, rate = {}, term = {}, isInsuranceEnabled = {}",
                 amount, monthlyPayment, rate, term, isInsuranceEnabled);
 
@@ -284,6 +309,8 @@ public class ConveyorServiceImpl implements ConveyorService{
     }
 
     private BigDecimal calculatePsk(BigDecimal amount, List<PaymentScheduleElement> listPaymentScheduleElements) {
+        log.info("calculatePsk(), amount = {}, listPaymentScheduleElements = {}", amount, listPaymentScheduleElements);
+        // Ссылка на иисточник с формулой рачета ПСК https://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%BB%D0%BD%D0%B0%D1%8F_%D1%81%D1%82%D0%BE%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C_%D0%BA%D1%80%D0%B5%D0%B4%D0%B8%D1%82%D0%B0
         List<BigDecimal> listTotalPayments = listPaymentScheduleElements.stream().map(PaymentScheduleElement::getTotalPayment).toList();
         BigDecimal i = BigDecimal.ZERO;
         BigDecimal d = BigDecimal.valueOf(0.1);
@@ -310,7 +337,10 @@ public class ConveyorServiceImpl implements ConveyorService{
         }
         log.info("calculatePsk(), расчитали значение i (составляющая формулы psk), i = {}", i);
 
-        BigDecimal psk = i.multiply(BigDecimal.valueOf(365).divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP)).multiply(BigDecimal.valueOf(100)).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal psk = i.multiply(BigDecimal.valueOf(365)
+                .divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP))
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(3, RoundingMode.HALF_UP);
         log.info("calculatePsk(), расчитали значение psk, return psk = {}", psk);
         return psk;
     }

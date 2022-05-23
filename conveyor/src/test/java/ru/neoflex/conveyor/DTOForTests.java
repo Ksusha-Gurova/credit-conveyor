@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class DTOForTests {
-    public static final LoanApplicationRequestDTO loanApplicationRequestDTO1 =
+    public static final LoanApplicationRequestDTO loanApplicationRequestDTOCorrect =
             LoanApplicationRequestDTO.builder()
             .amount(BigDecimal.valueOf(100000))
             .term(6)
@@ -20,7 +20,7 @@ public class DTOForTests {
             .passportSeries("1111")
             .passportNumber("666666")
             .build();
-    public static final LoanApplicationRequestDTO loanApplicationRequestDTO2 =
+    public static final LoanApplicationRequestDTO loanApplicationRequestDTOWrongAge =
             LoanApplicationRequestDTO.builder()
                     .amount(BigDecimal.valueOf(100000))
                     .term(6)
@@ -32,7 +32,7 @@ public class DTOForTests {
                     .passportSeries("1111")
                     .passportNumber("666666")
                     .build();
-    public static final ScoringDataDTO scoringDataDTO1 =
+    public static final ScoringDataDTO scoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient =
             ScoringDataDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -57,7 +57,7 @@ public class DTOForTests {
                     .isInsuranceEnabled(true)
                     .isSalaryClient(true)
                     .build();
-    public static final ScoringDataDTO scoringDataDTO2 =
+    public static final ScoringDataDTO scoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient =
             ScoringDataDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -82,7 +82,7 @@ public class DTOForTests {
                     .isInsuranceEnabled(false)
                     .isSalaryClient(true)
                     .build();
-    public static final CreditDTO creditDTO1 =
+    public static final CreditDTO creditDTOFromScoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient =
             CreditDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -150,7 +150,7 @@ public class DTOForTests {
                                     .build()
                     ))
                     .build();
-    public static final CreditDTO creditDTO2 =
+    public static final CreditDTO creditDTOFromScoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient =
             CreditDTO.builder()
                     .amount(BigDecimal.valueOf(900000))
                     .term(6)
@@ -218,7 +218,7 @@ public class DTOForTests {
                                     .build()
                     ))
                     .build();
-    public static final List<LoanOfferDTO> loanOfferDTOList1 = List.of(
+    public static final List<LoanOfferDTO> loanOfferDTOListFromLoanApplicationRequestDTOCorrect = List.of(
                     LoanOfferDTO.builder()
                             .applicationId(4L)
                             .requestedAmount(BigDecimal.valueOf(100000))
