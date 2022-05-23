@@ -23,6 +23,18 @@ public class ConveyorServiceImpl implements ConveyorService{
     private static final BigDecimal MAX_SALARY_MULTIPLIER = BigDecimal.valueOf(20);
     private static final Integer MIN_WORK_EXPERIENCE_TOTAL = 12;
     private static final Integer MIN_WORK_EXPERIENCE_CURRENT = 3;
+    private static final BigDecimal selfEmployedValue = BigDecimal.valueOf(1);
+    private static final BigDecimal businessOwnerValue = BigDecimal.valueOf(3);
+    private static final BigDecimal middleManagerValue = BigDecimal.valueOf(-2);
+    private static final BigDecimal topManagerValue = BigDecimal.valueOf(-4);
+    private static final BigDecimal marriedValue = BigDecimal.valueOf(-3);
+    private static final BigDecimal divorcedValue = BigDecimal.valueOf(1);
+    private static final BigDecimal dependentAmountValue = BigDecimal.valueOf(1);
+    private static final BigDecimal female35_60Value = BigDecimal.valueOf(-3);
+    private static final BigDecimal male30_55Value = BigDecimal.valueOf(-3);
+    private static final BigDecimal nonBinaryValue = BigDecimal.valueOf(3);
+    private static final BigDecimal insuranceValue = BigDecimal.valueOf(-2);
+    private static final BigDecimal salaryClientValue = BigDecimal.valueOf(-1);
 
     @Value("${application.rate}")
     private BigDecimal baseRate;
@@ -141,56 +153,56 @@ public class ConveyorServiceImpl implements ConveyorService{
         BigDecimal tempRate = baseRate;
         log.info("calculateCreditRate(), ставка равна базовой ставке tempRate = {}", tempRate);
         if (dto.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED)){
-            tempRate = tempRate.add(BigDecimal.valueOf(1));
-            log.info("calculateCreditRate(), ставка увеличивается на 1 для самозанятого, tempRate = {}", tempRate);
+            tempRate = tempRate.add(selfEmployedValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для самозанятого, tempRate = {}",selfEmployedValue, tempRate);
         }
         if (dto.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER)){
-            tempRate = tempRate.add(BigDecimal.valueOf(3));
-            log.info("calculateCreditRate(), ставка увеличивается на 3 для владельца бизнеса, tempRate = {}", tempRate);
+            tempRate = tempRate.add(businessOwnerValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для владельца бизнеса, tempRate = {}",businessOwnerValue, tempRate);
         }
         if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.MIDDLE_MANAGER)){
-            tempRate = tempRate.subtract(BigDecimal.valueOf(2));
-            log.info("calculateCreditRate(), ставка уменьшается на 2 для менеджера среднего звена, tempRate = {}", tempRate);
+            tempRate = tempRate.add(middleManagerValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для менеджера среднего звена, tempRate = {}",middleManagerValue, tempRate);
         }
         if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.TOP_MANAGER)){
-            tempRate = tempRate.subtract(BigDecimal.valueOf(4));
-            log.info("calculateCreditRate(), ставка уменьшается на 4 для топ-менеджера, tempRate = {}", tempRate);
+            tempRate = tempRate.add(topManagerValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для топ-менеджера, tempRate = {}",topManagerValue, tempRate);
         }
         if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.MARIED)){
-            tempRate = tempRate.subtract(BigDecimal.valueOf(3));
-            log.info("calculateCreditRate(), ставка уменьшается на 3 для зумужней/женатого, tempRate = {}", tempRate);
+            tempRate = tempRate.add(marriedValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для зумужней/женатого, tempRate = {}",marriedValue, tempRate);
         }
         if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.DIVORCED)){
-            tempRate = tempRate.add(BigDecimal.valueOf(1));
-            log.info("calculateCreditRate(), ставка увеличивается на 1 для разведенного, tempRate = {}", tempRate);
+            tempRate = tempRate.add(divorcedValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для разведенного, tempRate = {}",divorcedValue, tempRate);
         }
         if (dto.getDependentAmount() > 1){
-            tempRate = tempRate.add(BigDecimal.valueOf(1));
-            log.info("calculateCreditRate(), ставка увеличивается на 1 если еждевенцев более 1, tempRate = {}", tempRate);
+            tempRate = tempRate.add(dependentAmountValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если еждевенцев более 1, tempRate = {}",dependentAmountValue, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.FEMALE)
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) >= 35
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) <= 60){
-            tempRate = tempRate.subtract(BigDecimal.valueOf(3));
-            log.info("calculateCreditRate(), ставка уменьшается на 3 для женщины от 30 до 60 лет, tempRate = {}", tempRate);
+            tempRate = tempRate.add(female35_60Value);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для женщины от 30 до 60 лет, tempRate = {}",female35_60Value, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.MALE)
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) >= 30
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) <= 55){
-            tempRate = tempRate.subtract(BigDecimal.valueOf(3));
-            log.info("calculateCreditRate(), ставка уменьшается на 3 для мужчины от 30 до 55 лет, tempRate = {}", tempRate);
+            tempRate = tempRate.add(male30_55Value);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для мужчины от 30 до 55 лет, tempRate = {}",male30_55Value, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.NON_BINARY)){
-            tempRate = tempRate.add(BigDecimal.valueOf(3));
-            log.info("calculateCreditRate(), ставка увеличивается на 3 для не бинарного, tempRate = {}", tempRate);
+            tempRate = tempRate.add(nonBinaryValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для не бинарного, tempRate = {}",nonBinaryValue, tempRate);
         }
         if (dto.getIsInsuranceEnabled()) {
-            tempRate = tempRate.subtract(BigDecimal.valueOf(2));
-            log.info("calculateCreditRate(), ставка уменьшается на 2 если включена страховка, tempRate = {}", tempRate);
+            tempRate = tempRate.add(insuranceValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если включена страховка, tempRate = {}",insuranceValue, tempRate);
         }
         if (dto.getIsSalaryClient()) {
-            tempRate = tempRate.subtract(BigDecimal.valueOf(1));
-            log.info("calculateCreditRate(), ставка уменьшается на 1 если зарплатный клиент, tempRate = {}", tempRate);
+            tempRate = tempRate.add(salaryClientValue);
+            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если зарплатный клиент, tempRate = {}",salaryClientValue, tempRate);
         }
         log.info("calculateCreditRate(), return tempRate = {}", tempRate);
         return tempRate;
