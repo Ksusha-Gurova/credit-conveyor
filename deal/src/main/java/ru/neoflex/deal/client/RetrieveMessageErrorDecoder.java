@@ -12,11 +12,11 @@ import java.io.InputStream;
 
 @Slf4j
 public class RetrieveMessageErrorDecoder implements ErrorDecoder {
-    private ErrorDecoder errorDecoder = new Default();
+    private final ErrorDecoder errorDecoder = new Default();
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        ErrorMessage message = null;
+        ErrorMessage message;
         try (InputStream bodyIs = response.body()
                 .asInputStream()) {
             ObjectMapper mapper = new ObjectMapper();

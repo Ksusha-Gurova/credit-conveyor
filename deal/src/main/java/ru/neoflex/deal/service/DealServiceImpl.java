@@ -75,6 +75,7 @@ public class DealServiceImpl implements DealService{
 
         ScoringDataDTO scoringDataDTO =
                 ScoringDataDTO.builder()
+                        .amount(application.getAppliedOffer().getRequestedAmount())
                         .term(application.getAppliedOffer().getTerm())
                         .firstName(application.getClient().getFirstName())
                         .lastName(application.getClient().getLastName())
@@ -137,19 +138,21 @@ public class DealServiceImpl implements DealService{
 
     @Override
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
-        log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
-
         Client client = clientRepository.save(clientMapper.mapDtoToEntity(loanApplicationRequestDTO));
         log.info("calculateCreditOffers(), создается объект Client и сохраняется в базу, client = {}", client);
 
         Application application = applicationRepository.save(applicationMapper.mapDtoToEntity(loanApplicationRequestDTO, client));
         log.info("calculateCreditOffers(), создается объект Application и сохраняется в базу, application = {}", application);
 
-        List<LoanOfferDTO> loanOffers = conveyorClient.getLoanOffers(loanApplicationRequestDTO);
-        log.info("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
+        List<LoanOfferDTO> loanOffers;
 
-        loanOffers.forEach(offer -> offer.setApplicationId(application.getId()));
-        log.info("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
+            loanOffers = conveyorClient.getLoanOffers(loanApplicationRequestDTO);
+            log.info("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
+
+            loanOffers.forEach(offer -> offer.setApplicationId(application.getId()));
+            log.info("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
+
+        log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return loanOffers;
     }
 }

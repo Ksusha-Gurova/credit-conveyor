@@ -47,7 +47,8 @@ public class Credit {
 
     @Column(name = "is_salary_client")
     private Boolean isSalaryClient;
-    @Lob
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "credit_status")
     private CreditStatus creditStatus;
 

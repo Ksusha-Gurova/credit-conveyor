@@ -6,7 +6,6 @@ import org.openapitools.api.DealApi;
 import org.openapitools.model.FinishRegistrationRequestDTO;
 import org.openapitools.model.LoanApplicationRequestDTO;
 import org.openapitools.model.LoanOfferDTO;
-import org.openapitools.model.ScoringDataDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.neoflex.deal.service.DealService;

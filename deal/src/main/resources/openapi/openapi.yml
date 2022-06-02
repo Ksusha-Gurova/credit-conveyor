@@ -352,7 +352,7 @@ components:
         - unemployed
         - self_employed
         - employed
-        - business
+        - business_owner
 
     Position:
       type: string
