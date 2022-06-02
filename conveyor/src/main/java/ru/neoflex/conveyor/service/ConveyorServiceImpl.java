@@ -168,7 +168,7 @@ public class ConveyorServiceImpl implements ConveyorService{
             tempRate = tempRate.add(topManagerValue);
             log.info("calculateCreditRate(), к базовой ставке прибавляется {} для топ-менеджера, tempRate = {}",topManagerValue, tempRate);
         }
-        if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.MARIED)){
+        if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.MARRIED)){
             tempRate = tempRate.add(marriedValue);
             log.info("calculateCreditRate(), к базовой ставке прибавляется {} для зумужней/женатого, tempRate = {}",marriedValue, tempRate);
         }
