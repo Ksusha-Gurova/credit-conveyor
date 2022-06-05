@@ -22,19 +22,17 @@ public class Employment {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "employment_status", nullable = false)
-    private EmploymentStatus employmentStatus;
+    private String employmentStatus;
 
     @Column(name = "employer", nullable = false)
-    private String employer;
+    private String employerINN;
 
     @Column(name = "salary", nullable = false)
     private BigDecimal salary;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "\"position\"", nullable = false)
-    private Position position;
+    private String position;
 
     @Column(name = "work_experience_total", nullable = false)
     private Integer workExperienceTotal;

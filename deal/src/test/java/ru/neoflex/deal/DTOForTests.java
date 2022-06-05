@@ -115,9 +115,9 @@ public class DTOForTests {
             .build();
 
     public static final Employment employment = Employment.builder()
-            .employmentStatus(EmploymentStatus.BUSINESS_OWNER)
+            .employmentStatus("BUSINESS_OWNER")
             .salary(BigDecimal.valueOf(65000))
-            .position(Position.OWNER)
+            .position("OWNER")
             .workExperienceTotal(36)
             .workExperienceCurrent(12)
             .build();
@@ -226,8 +226,8 @@ public class DTOForTests {
             .firstName("Kseniya")
             .birthdate(LocalDate.of(1985, 3, 20))
             .email("blablabla@mail.ru")
-            .gender(Gender.FEMALE)
-            .maritalStatus(MaritalStatus.MARRIED)
+            .gender("female")
+            .maritalStatus("married")
             .dependentAmount(2)
             .passport(Passport.builder()
                     .series("1234")

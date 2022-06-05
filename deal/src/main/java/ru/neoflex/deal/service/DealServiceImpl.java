@@ -101,10 +101,10 @@ public class DealServiceImpl implements DealService{
         log.info("calculateCredit(), создается объект employment с данными из finishRegistrationRequestDTO и сохраняется в базу, " +
                 "employment = {}", employment);
 
-        application.getClient().setGender(finishRegistrationRequestDTO.getGender());
+        application.getClient().setGender(finishRegistrationRequestDTO.getGender().getValue());
         application.getClient().getPassport().setIssueDate(finishRegistrationRequestDTO.getPassportIssueDate());
         application.getClient().getPassport().setIssueBranch(finishRegistrationRequestDTO.getPassportIssueBranch());
-        application.getClient().setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus());
+        application.getClient().setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus().getValue());
         application.getClient().setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
         application.getClient().setEmployment(employment);
         Client client = clientRepository.save(application.getClient());

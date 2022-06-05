@@ -32,9 +32,10 @@ class EmploymentMapperImplTest {
             .workExperienceCurrent(7)
             .build();
     employment = Employment.builder()
-            .employmentStatus(EmploymentStatus.EMPLOYED)
+            .employmentStatus("EMPLOYED")
             .salary(BigDecimal.valueOf(10000))
-            .position(Position.MID_MANAGER)
+            .position("MID_MANAGER")
+            .employerINN("12345678900")
             .workExperienceTotal(22)
             .workExperienceCurrent(7)
             .build();

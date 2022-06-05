@@ -41,13 +41,11 @@ public class Client {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
-    private Gender gender;
+    private String gender;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "marital_status")
-    private MaritalStatus maritalStatus;
+    private String maritalStatus;
 
     @Column(name = "dependent_amount")
     private Integer dependentAmount;
