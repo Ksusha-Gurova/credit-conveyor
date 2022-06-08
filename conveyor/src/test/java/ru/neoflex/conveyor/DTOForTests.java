@@ -69,7 +69,7 @@ public class DTOForTests {
                     .passportNumber("567890")
                     .passportIssueDate(LocalDate.of(2002, 6, 12))
                     .passportIssueBranch("abc")
-                    .maritalStatus(ScoringDataDTO.MaritalStatusEnum.MARIED)
+                    .maritalStatus(ScoringDataDTO.MaritalStatusEnum.MARRIED)
                     .dependentAmount(1)
                     .employment(EmploymentDTO.builder()
                             .employmentStatus(EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER)

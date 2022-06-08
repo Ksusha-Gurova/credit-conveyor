@@ -43,27 +43,27 @@ public class ConveyorServiceImpl implements ConveyorService{
 
     @Override
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
-        log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
+        log.debug("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
 
         if (ChronoUnit.YEARS.between(loanApplicationRequestDTO.getBirthdate(), LocalDate.now()) < PRESCORING_MATURITY_AGE){
-            log.info("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка отклоняется");
+            log.debug("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка отклоняется");
             throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
         }
 
         LoanOfferDTO insuranceTrueSalaryTrue = createOffer(1L,loanApplicationRequestDTO, true, true);
-        log.info("calculateCreditOffers(), создали предложение с включенной страховкой и для зарплатного клиента, insuranceTrueSalaryTrue = {}", insuranceTrueSalaryTrue);
+        log.debug("calculateCreditOffers(), создали предложение с включенной страховкой и для зарплатного клиента, insuranceTrueSalaryTrue = {}", insuranceTrueSalaryTrue);
 
         LoanOfferDTO insuranceTrueSalaryFalse = createOffer(2L, loanApplicationRequestDTO, true, false);
-        log.info("calculateCreditOffers(), создали предложение с включенной страховкой, insuranceTrueSalaryFalse = {}", insuranceTrueSalaryFalse);
+        log.debug("calculateCreditOffers(), создали предложение с включенной страховкой, insuranceTrueSalaryFalse = {}", insuranceTrueSalaryFalse);
 
         LoanOfferDTO insuranceFalseSalaryTrue = createOffer(3L, loanApplicationRequestDTO, false, true);
-        log.info("calculateCreditOffers(), создали предложение без страховки для зарплатного клиента, insuranceFalseSalaryTrue = {}", insuranceFalseSalaryTrue);
+        log.debug("calculateCreditOffers(), создали предложение без страховки для зарплатного клиента, insuranceFalseSalaryTrue = {}", insuranceFalseSalaryTrue);
 
         LoanOfferDTO insuranceFalseSalaryFalse = createOffer(4L, loanApplicationRequestDTO, false, false);
-        log.info("calculateCreditOffers(), создали предложение без страховки, insuranceFalseSalaryFalse = {}", insuranceFalseSalaryFalse);
+        log.debug("calculateCreditOffers(), создали предложение без страховки, insuranceFalseSalaryFalse = {}", insuranceFalseSalaryFalse);
 
         List<LoanOfferDTO> loanOffers = Arrays.asList(insuranceTrueSalaryTrue, insuranceTrueSalaryFalse, insuranceFalseSalaryTrue, insuranceFalseSalaryFalse);
-        log.info("calculateCreditOffers(), создали список со всеми ранее инициализированными предложениями, loanOffers = {}", loanOffers);
+        log.debug("calculateCreditOffers(), создали список со всеми ранее инициализированными предложениями, loanOffers = {}", loanOffers);
 
         loanOffers = loanOffers.stream().sorted(Comparator.comparing(LoanOfferDTO::getRate).reversed()).toList();
         log.info("calculateCreditOffers(), отсортировали список с предложениями (от хкдшего к лучшему) по ставке, return loanOffers = {}", loanOffers);
@@ -73,26 +73,26 @@ public class ConveyorServiceImpl implements ConveyorService{
 
     @Override
     public CreditDTO calculateCreditParameters(ScoringDataDTO scoringDataDTO) {
-        log.info("calculateCreditParameters(), scoringDataDTO = {}", scoringDataDTO);
+        log.debug("calculateCreditParameters(), scoringDataDTO = {}", scoringDataDTO);
 
         List<String> creditDeclineMessagesList = new ArrayList<>();
 
         if (scoringDataDTO.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED)){
-            log.info("calculateCreditParameters(), из-за рабочего статуса - безработный в кредите отказано");
+            log.debug("calculateCreditParameters(), из-за рабочего статуса - безработный в кредите отказано");
             creditDeclineMessagesList.add("Ваш рабочий статус: безработный");
         }
         if (scoringDataDTO.getEmployment().getSalary().multiply(MAX_SALARY_MULTIPLIER).compareTo(scoringDataDTO.getAmount()) < 0){
-            log.info("calculateCreditParameters(), из-за размера кредите превышающего 20 зарплат в кредите отказано");
+            log.debug("calculateCreditParameters(), из-за размера кредита превышающего 20 зарплат в кредите отказано");
             creditDeclineMessagesList.add("Запрашиваемая сумма больше 20-и зарплат");
         }
         if (ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) < SCORING_MIN_AGE
                 || ChronoUnit.YEARS.between(scoringDataDTO.getBirthdate(), LocalDate.now()) > SCORING_MAX_AGE){
-            log.info("calculateCreditParameters(), из-за возраста равного менее 20 или более 60 в кредите отказано");
+            log.debug("calculateCreditParameters(), из-за возраста равного менее 20 или более 60 в кредите отказано");
             creditDeclineMessagesList.add("Ваш возраст менее 20-и или более 60-и");
         }
         if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < MIN_WORK_EXPERIENCE_TOTAL
                 || scoringDataDTO.getEmployment().getWorkExperienceCurrent() < MIN_WORK_EXPERIENCE_CURRENT){
-            log.info("calculateCreditParameters(), из-за общего стажа работы равного менее 12 месяцам или текущего стажа работы равного менее 3 месяцам в кредите отказано");
+            log.debug("calculateCreditParameters(), из-за общего стажа работы равного менее 12 месяцам или текущего стажа работы равного менее 3 месяцам в кредите отказано");
             creditDeclineMessagesList.add("Ваш общий стаж работы менее 12-и месяцев и/или текущий стаж работы менее 3-х месяцев");
         }
         if (!creditDeclineMessagesList.isEmpty()){
@@ -101,10 +101,10 @@ public class ConveyorServiceImpl implements ConveyorService{
         }
 
         BigDecimal rate = calculateCreditRate(scoringDataDTO);
-        log.info("calculateCreditParameters(), расчитали процентную ставку по кредиту, rate = {}", rate);
+        log.debug("calculateCreditParameters(), расчитали процентную ставку по кредиту, rate = {}", rate);
 
         BigDecimal monthlyPayment = calculateMonthlyPayment(scoringDataDTO.getAmount(), rate, scoringDataDTO.getTerm());
-        log.info("calculateCreditParameters(), расчитали ежемесячный платеж, monthlyPayment = {}", monthlyPayment);
+        log.debug("calculateCreditParameters(), расчитали ежемесячный платеж, monthlyPayment = {}", monthlyPayment);
 
         List<PaymentScheduleElement> paymentScheduleElements = calculatePaymentScheduleElement(
                 scoringDataDTO.getAmount(),
@@ -112,7 +112,7 @@ public class ConveyorServiceImpl implements ConveyorService{
                 rate,
                 scoringDataDTO.getTerm(),
                 scoringDataDTO.getIsInsuranceEnabled());
-        log.info("calculateCreditParameters(), создан список ежемесячных платежей, paymentScheduleElements = {}", paymentScheduleElements);
+        log.debug("calculateCreditParameters(), создан список ежемесячных платежей, paymentScheduleElements = {}", paymentScheduleElements);
 
         CreditDTO creditDTO = CreditDTO.builder()
                 .amount(scoringDataDTO.getAmount())
@@ -130,86 +130,86 @@ public class ConveyorServiceImpl implements ConveyorService{
     }
 
     private BigDecimal calculateCreditRate(boolean isInsuranceEnabled, boolean isSalaryClient){
-        log.info("calculateCreditRate(), isInsuranceEnabled = {}, isSalaryClient = {}", isInsuranceEnabled, isSalaryClient);
+        log.debug("calculateCreditRate(), isInsuranceEnabled = {}, isSalaryClient = {}", isInsuranceEnabled, isSalaryClient);
 
         BigDecimal tempRate = baseRate;
-        log.info("calculateCreditRate(), создаем tempRate = {}", tempRate);
+        log.debug("calculateCreditRate(), создаем tempRate = {}", tempRate);
 
         if (isInsuranceEnabled) {
             tempRate = tempRate.subtract(BigDecimal.valueOf(2));
-            log.info("calculateCreditRate(), ставка уменьшается на 2, tempRate = {}", tempRate);
+            log.debug("calculateCreditRate(), ставка уменьшается на 2, tempRate = {}", tempRate);
         }
         if (isSalaryClient) {
             tempRate = tempRate.subtract(BigDecimal.valueOf(1));
-            log.info("calculateCreditRate(), ставка уменьшается на 1б tempRate = {}", tempRate);
+            log.debug("calculateCreditRate(), ставка уменьшается на 1б tempRate = {}", tempRate);
         }
         log.info("calculateCreditRate(), return tempRate = {}", tempRate);
         return tempRate;
     }
 
     private BigDecimal calculateCreditRate(ScoringDataDTO dto){
-        log.info("calculateCreditRate(), dto = {}", dto);
+        log.debug("calculateCreditRate(), dto = {}", dto);
 
         BigDecimal tempRate = baseRate;
-        log.info("calculateCreditRate(), ставка равна базовой ставке tempRate = {}", tempRate);
+        log.debug("calculateCreditRate(), ставка равна базовой ставке tempRate = {}", tempRate);
         if (dto.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED)){
             tempRate = tempRate.add(selfEmployedValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для самозанятого, tempRate = {}",selfEmployedValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для самозанятого, tempRate = {}",selfEmployedValue, tempRate);
         }
         if (dto.getEmployment().getEmploymentStatus().equals(EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER)){
             tempRate = tempRate.add(businessOwnerValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для владельца бизнеса, tempRate = {}",businessOwnerValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для владельца бизнеса, tempRate = {}",businessOwnerValue, tempRate);
         }
         if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.MIDDLE_MANAGER)){
             tempRate = tempRate.add(middleManagerValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для менеджера среднего звена, tempRate = {}",middleManagerValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для менеджера среднего звена, tempRate = {}",middleManagerValue, tempRate);
         }
         if (Objects.equals(dto.getEmployment().getPosition(), EmploymentDTO.PositionEnum.TOP_MANAGER)){
             tempRate = tempRate.add(topManagerValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для топ-менеджера, tempRate = {}",topManagerValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для топ-менеджера, tempRate = {}",topManagerValue, tempRate);
         }
-        if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.MARIED)){
+        if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.MARRIED)){
             tempRate = tempRate.add(marriedValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для зумужней/женатого, tempRate = {}",marriedValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для зумужней/женатого, tempRate = {}",marriedValue, tempRate);
         }
         if (dto.getMaritalStatus().equals(ScoringDataDTO.MaritalStatusEnum.DIVORCED)){
             tempRate = tempRate.add(divorcedValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для разведенного, tempRate = {}",divorcedValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для разведенного, tempRate = {}",divorcedValue, tempRate);
         }
         if (dto.getDependentAmount() > 1){
             tempRate = tempRate.add(dependentAmountValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если еждевенцев более 1, tempRate = {}",dependentAmountValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} если еждевенцев более 1, tempRate = {}",dependentAmountValue, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.FEMALE)
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) >= 35
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) <= 60){
             tempRate = tempRate.add(female35_60Value);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для женщины от 30 до 60 лет, tempRate = {}",female35_60Value, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для женщины от 30 до 60 лет, tempRate = {}",female35_60Value, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.MALE)
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) >= 30
                 && ChronoUnit.YEARS.between(dto.getBirthdate(), LocalDate.now()) <= 55){
             tempRate = tempRate.add(male30_55Value);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для мужчины от 30 до 55 лет, tempRate = {}",male30_55Value, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для мужчины от 30 до 55 лет, tempRate = {}",male30_55Value, tempRate);
         }
         if (dto.getGender().equals(ScoringDataDTO.GenderEnum.NON_BINARY)){
             tempRate = tempRate.add(nonBinaryValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} для не бинарного, tempRate = {}",nonBinaryValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} для не бинарного, tempRate = {}",nonBinaryValue, tempRate);
         }
         if (dto.getIsInsuranceEnabled()) {
             tempRate = tempRate.add(insuranceValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если включена страховка, tempRate = {}",insuranceValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} если включена страховка, tempRate = {}",insuranceValue, tempRate);
         }
         if (dto.getIsSalaryClient()) {
             tempRate = tempRate.add(salaryClientValue);
-            log.info("calculateCreditRate(), к базовой ставке прибавляется {} если зарплатный клиент, tempRate = {}",salaryClientValue, tempRate);
+            log.debug("calculateCreditRate(), к базовой ставке прибавляется {} если зарплатный клиент, tempRate = {}",salaryClientValue, tempRate);
         }
         log.info("calculateCreditRate(), return tempRate = {}", tempRate);
         return tempRate;
     }
 
     private BigDecimal calculateMonthlyPayment(BigDecimal amount, BigDecimal rate, Integer term){
-        log.info("calculateMonthlyPayment(), amount = {}, rate = {}, term = {}", amount, rate, term);
+        log.debug("calculateMonthlyPayment(), amount = {}, rate = {}, term = {}", amount, rate, term);
         //Ссылка на источник с формулой расчета ежемесячного платежа https://journal.tinkoff.ru/guide/credit-payment/
         //monthlyPayment = amount * (rate/100/12 * (1 + rate/100/12)^term) / ((1 + rate/100/12)^term - 1)
         //                           monthlyRate      coefficientPart1                  coefficientPart3
@@ -225,9 +225,9 @@ public class ConveyorServiceImpl implements ConveyorService{
     }
 
     private BigDecimal calculateTotalAmount(BigDecimal amount, BigDecimal rate, Integer term, boolean isInsuranceEnabled){
-        log.info("calculateTotalAmount(), amount = {}, rate = {}, term = {}, isInsuranceEnabled = {}", amount, rate, term, isInsuranceEnabled);
+        log.debug("calculateTotalAmount(), amount = {}, rate = {}, term = {}, isInsuranceEnabled = {}", amount, rate, term, isInsuranceEnabled);
         BigDecimal totalAmount;
-        log.info("calculateTotalAmount(), создана переменная totalAmount");
+        log.debug("calculateTotalAmount(), создана переменная totalAmount");
         if (isInsuranceEnabled){
             totalAmount =
                     calculateMonthlyPayment(amount, rate, term)
@@ -241,7 +241,7 @@ public class ConveyorServiceImpl implements ConveyorService{
     }
 
     private LoanOfferDTO createOffer(Long id,LoanApplicationRequestDTO dto, Boolean isInsuranceEnabled, Boolean isSalaryClient){
-        log.info("createOffer(), id = {}, dto = {}, isInsuranceEnabled = {}, isSalaryClient = {}", id, dto, isInsuranceEnabled, isSalaryClient);
+        log.debug("createOffer(), id = {}, dto = {}, isInsuranceEnabled = {}, isSalaryClient = {}", id, dto, isInsuranceEnabled, isSalaryClient);
         LoanOfferDTO loanOfferDTO = LoanOfferDTO.builder()
                 .applicationId(id)
                 .requestedAmount(dto.getAmount())
@@ -268,11 +268,11 @@ public class ConveyorServiceImpl implements ConveyorService{
             BigDecimal rate,
             Integer term,
             boolean isInsuranceEnabled){
-        log.info("calculatePaymentScheduleElement(), amount = {}, monthlyPayment = {}, rate = {}, term = {}, isInsuranceEnabled = {}",
+        log.debug("calculatePaymentScheduleElement(), amount = {}, monthlyPayment = {}, rate = {}, term = {}, isInsuranceEnabled = {}",
                 amount, monthlyPayment, rate, term, isInsuranceEnabled);
 
         List<PaymentScheduleElement> listPayments = new ArrayList<>();
-        log.info("calculatePaymentScheduleElement(), создали список платежей, listPayments = {}", listPayments);
+        log.debug("calculatePaymentScheduleElement(), создали список платежей, listPayments = {}", listPayments);
 
         BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(1200), 15, RoundingMode.HALF_UP);
         if (isInsuranceEnabled){
@@ -284,7 +284,7 @@ public class ConveyorServiceImpl implements ConveyorService{
                     .debtPayment(BigDecimal.valueOf(0))
                     .remainingDebt(amount)
                     .build());
-            log.info("calculatePaymentScheduleElement(), добавили в список платеж №0 с стоимостью страховки, PaymentScheduleElement = {}", listPayments.get(0));
+            log.debug("calculatePaymentScheduleElement(), добавили в список платеж №0 с стоимостью страховки, PaymentScheduleElement = {}", listPayments.get(0));
         } else {
             listPayments.add(PaymentScheduleElement.builder()
                     .number(0)
@@ -294,7 +294,7 @@ public class ConveyorServiceImpl implements ConveyorService{
                     .debtPayment(BigDecimal.valueOf(0))
                     .remainingDebt(amount)
                     .build());
-            log.info("calculatePaymentScheduleElement(), добавили в список платеж №0, PaymentScheduleElement = {}", listPayments.get(0));
+            log.debug("calculatePaymentScheduleElement(), добавили в список платеж №0, PaymentScheduleElement = {}", listPayments.get(0));
         }
         for (int i = 1; i < term; i++){
             listPayments.add(PaymentScheduleElement.builder()
@@ -305,7 +305,7 @@ public class ConveyorServiceImpl implements ConveyorService{
                     .debtPayment(monthlyPayment.subtract(listPayments.get(i-1).getRemainingDebt().multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP)))
                     .remainingDebt(listPayments.get(i-1).getRemainingDebt().subtract(monthlyPayment.subtract(listPayments.get(i-1).getRemainingDebt().multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP))))
                     .build());
-            log.info("calculatePaymentScheduleElement(), добавили в список следующий платеж, PaymentScheduleElement = {}", listPayments.get(i));
+            log.debug("calculatePaymentScheduleElement(), добавили в список следующий платеж, PaymentScheduleElement = {}", listPayments.get(i));
         }
         listPayments.add(PaymentScheduleElement.builder()
                 .number(term)
@@ -315,13 +315,13 @@ public class ConveyorServiceImpl implements ConveyorService{
                 .debtPayment(listPayments.get(term - 1).getRemainingDebt().setScale(2, RoundingMode.HALF_UP))
                 .remainingDebt(BigDecimal.valueOf(0))
                 .build());
-        log.info("calculatePaymentScheduleElement(), добавили в список последний платеж, PaymentScheduleElement = {}", listPayments.get(term));
+        log.debug("calculatePaymentScheduleElement(), добавили в список последний платеж, PaymentScheduleElement = {}", listPayments.get(term));
         log.info("calculatePaymentScheduleElement(), return listPayments = {}", listPayments);
         return listPayments;
     }
 
     private BigDecimal calculatePsk(BigDecimal amount, List<PaymentScheduleElement> listPaymentScheduleElements) {
-        log.info("calculatePsk(), amount = {}, listPaymentScheduleElements = {}", amount, listPaymentScheduleElements);
+        log.debug("calculatePsk(), amount = {}, listPaymentScheduleElements = {}", amount, listPaymentScheduleElements);
         // Ссылка на иисточник с формулой рачета ПСК https://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%BB%D0%BD%D0%B0%D1%8F_%D1%81%D1%82%D0%BE%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C_%D0%BA%D1%80%D0%B5%D0%B4%D0%B8%D1%82%D0%B0
         List<BigDecimal> listTotalPayments = listPaymentScheduleElements.stream().map(PaymentScheduleElement::getTotalPayment).toList();
         BigDecimal i = BigDecimal.ZERO;
@@ -347,7 +347,7 @@ public class ConveyorServiceImpl implements ConveyorService{
 
             if (startAccuracy.equals(maxAccuracy)) break;
         }
-        log.info("calculatePsk(), расчитали значение i (составляющая формулы psk), i = {}", i);
+        log.debug("calculatePsk(), расчитали значение i (составляющая формулы psk), i = {}", i);
 
         BigDecimal psk = i.multiply(BigDecimal.valueOf(365)
                 .divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP))

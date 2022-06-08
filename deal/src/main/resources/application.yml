@@ -1,0 +1,12 @@
+server:
+  port: ${SERVER_PORT:8081}
+spring:
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+#  liquibase:
+#    enabled: true
+#    change-log: db/changelog/db.changelog-master.xml
+#    drop-first: false
