@@ -40,28 +40,28 @@ class ConveyorControllerTest {
                 .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.loanOfferDTOListFromLoanApplicationRequestDTOCorrect)));
     }
 
-//    @Test
-//    @SneakyThrows
-//    void calculateCreditOffersShouldReturnDtoListAndStatus200Test2() {
-//        mockMvc.perform(post("/conveyor/offers")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTOWrongAge)))
-//                .andExpect(status().isBadRequest());
-//    }
+    @Test
+    @SneakyThrows
+    void calculateCreditOffersShouldReturnDtoListAndStatus200Test2() {
+        mockMvc.perform(post("/conveyor/offers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectWriter.writeValueAsString(DTOForTests.loanApplicationRequestDTOWrongAge)))
+                .andExpect(status().isBadRequest());
+    }
 
-//    @Test
-//    @SneakyThrows
-//    void calculateCreditParametersShouldReturnCreditDtoAndStatus200Test() {
-//        mockMvc.perform(post("/conveyor/calculation")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)))
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)));
-//
-//        mockMvc.perform(post("/conveyor/calculation")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)))
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)));
-//    }
+    @Test
+    @SneakyThrows
+    void calculateCreditParametersShouldReturnCreditDtoAndStatus200Test() {
+        mockMvc.perform(post("/conveyor/calculation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectMan30_55DivorcedSelfEmployedInsuranceSalaryClient)));
+
+        mockMvc.perform(post("/conveyor/calculation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectWriter.writeValueAsString(DTOForTests.scoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.creditDTOFromScoringDataDTOCorrectWoman35_60MariedBusinessOwnerSalaryClient)));
+    }
 }

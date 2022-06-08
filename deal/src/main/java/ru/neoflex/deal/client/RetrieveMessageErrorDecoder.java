@@ -25,12 +25,9 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
         } catch (IOException e) {
             return new Exception(e.getMessage());
         }
-        switch (response.status()) {
-            case 400:
-                log.info("Статус ответа - 400, сообщение: " + message.getMessage());
-
-            default:
-                return errorDecoder.decode(methodKey, response);
+        if (response.status() == 400) {
+            log.info("Статус ответа - 400, сообщение: " + message.getMessage());
         }
+        return errorDecoder.decode(methodKey, response);
     }
 }

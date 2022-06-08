@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.openapitools.model.EmploymentStatus;
-import org.openapitools.model.Position;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 
@@ -31,7 +28,7 @@ public class Employment {
     @Column(name = "salary", nullable = false)
     private BigDecimal salary;
 
-    @Column(name = "\"position\"", nullable = false)
+    @Column(name = "position", nullable = false)
     private String position;
 
     @Column(name = "work_experience_total", nullable = false)

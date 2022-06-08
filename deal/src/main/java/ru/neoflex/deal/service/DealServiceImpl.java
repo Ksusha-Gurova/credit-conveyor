@@ -44,22 +44,22 @@ public class DealServiceImpl implements DealService{
 
     @Override
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
-        log.info("applyOffer(), loanOfferDTO = {}", loanOfferDTO);
+        log.debug("applyOffer(), loanOfferDTO = {}", loanOfferDTO);
 
         Application application = applicationRepository.findById(loanOfferDTO.getApplicationId())
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + loanOfferDTO.getApplicationId()));
-        log.info("applyOffer(), из базы достается заявка по id из loanOfferDTO, application = {}", application);
+        log.debug("applyOffer(), из базы достается заявка по id из loanOfferDTO, application = {}", application);
 
         application.setStatus(ApplicationStatus.APPROVED);
         if (application.getStatusHistory() == null){
             application.setStatusHistory(new ArrayList<>());
-            log.info("applyOffer(), инициализируется новый список statusHistory");
+            log.debug("applyOffer(), инициализируется новый список statusHistory");
         }
         application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
-        log.info("applyOffer(), в список добавляется новый объект, statusHistory = {}", application.getStatusHistory());
+        log.debug("applyOffer(), в список добавляется новый объект, statusHistory = {}", application.getStatusHistory());
 
         application.setAppliedOffer(loanOfferDTO);
-        log.info("applyOffer(), в заявку добавляется информация из loanOfferDTO, application = {}", application);
+        log.debug("applyOffer(), в заявку добавляется информация из loanOfferDTO, application = {}", application);
 
         applicationRepository.save(application);
         log.info("applyOffer(), сохраняем заявку в базу");
@@ -67,11 +67,11 @@ public class DealServiceImpl implements DealService{
 
     @Override
     public void calculateCredit(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
-        log.info("calculateCredit(), applicationId = {}, finishRegistrationRequestDTO = {}", applicationId, finishRegistrationRequestDTO);
+        log.debug("calculateCredit(), applicationId = {}, finishRegistrationRequestDTO = {}", applicationId, finishRegistrationRequestDTO);
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
-        log.info("calculateCredit(), достали из базы заявку по applicationId, application = {}", application);
+        log.debug("calculateCredit(), достали из базы заявку по applicationId, application = {}", application);
 
         ScoringDataDTO scoringDataDTO =
                 ScoringDataDTO.builder()
@@ -93,12 +93,12 @@ public class DealServiceImpl implements DealService{
                         .isInsuranceEnabled(application.getAppliedOffer().getIsInsuranceEnabled())
                         .isSalaryClient(application.getAppliedOffer().getIsSalaryClient())
                         .build();
-        log.info("calculateCredit(), сформировали scoringDataDTO на основании finishRegistrationRequestDTO и данных о клиенте из application, " +
+        log.debug("calculateCredit(), сформировали scoringDataDTO на основании finishRegistrationRequestDTO и данных о клиенте из application, " +
                 "scoringDataDTO = {}", scoringDataDTO);
 
         Employment employment = employmentMapper.mapDtoToEntity(finishRegistrationRequestDTO.getEmployment());
         employment = employmentRepository.save(employment);
-        log.info("calculateCredit(), создается объект employment с данными из finishRegistrationRequestDTO и сохраняется в базу, " +
+        log.debug("calculateCredit(), создается объект employment с данными из finishRegistrationRequestDTO и сохраняется в базу, " +
                 "employment = {}", employment);
 
         application.getClient().setGender(finishRegistrationRequestDTO.getGender().getValue());
@@ -108,7 +108,7 @@ public class DealServiceImpl implements DealService{
         application.getClient().setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
         application.getClient().setEmployment(employment);
         Client client = clientRepository.save(application.getClient());
-        log.info("calculateCredit(), добавляем информацию в таблицу client из finishRegistrationRequestDTO, client = {}", client);
+        log.debug("calculateCredit(), добавляем информацию в таблицу client из finishRegistrationRequestDTO, client = {}", client);
 
         CreditDTO creditDTO;
         try {
@@ -120,39 +120,37 @@ public class DealServiceImpl implements DealService{
 
             application.setStatus(ApplicationStatus.CC_APPROVED);
             application.setCredit(credit);
-            log.info("calculateCredit(), сохраняем credit в application  и обновляем статус на CC_APPROVED");
+            log.debug("calculateCredit(), сохраняем credit в application  и обновляем статус на CC_APPROVED");
         } catch (FeignException e) {
-            switch (e.status()){
-                case (BAD_REQUEST_STATUS) :
-                    application.setStatus(ApplicationStatus.CC_DENIED);
-                    log.info("calculateCredit(), обновляем статус на CC_DENIED");
-                    break;
+            if (e.status() == BAD_REQUEST_STATUS) {
+                application.setStatus(ApplicationStatus.CC_DENIED);
+                log.debug("calculateCredit(), обновляем статус на CC_DENIED");
             }
         }
 
         application.getStatusHistory()
                 .add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(), ChangeType.AUTOMATIC));
         application = applicationRepository.save(application);
-        log.info("calculateCredit(), обновляем statusHistory и сохраняем измененную заявку в базу, application = {}", application);
+        log.debug("calculateCredit(), обновляем statusHistory и сохраняем измененную заявку в базу, application = {}", application);
     }
 
     @Override
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
         Client client = clientRepository.save(clientMapper.mapDtoToEntity(loanApplicationRequestDTO));
-        log.info("calculateCreditOffers(), создается объект Client и сохраняется в базу, client = {}", client);
+        log.debug("calculateCreditOffers(), создается объект Client и сохраняется в базу, client = {}", client);
 
         Application application = applicationRepository.save(applicationMapper.mapDtoToEntity(loanApplicationRequestDTO, client));
-        log.info("calculateCreditOffers(), создается объект Application и сохраняется в базу, application = {}", application);
+        log.debug("calculateCreditOffers(), создается объект Application и сохраняется в базу, application = {}", application);
 
         List<LoanOfferDTO> loanOffers;
 
             loanOffers = conveyorClient.getLoanOffers(loanApplicationRequestDTO);
-            log.info("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
+            log.debug("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
 
             loanOffers.forEach(offer -> offer.setApplicationId(application.getId()));
-            log.info("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
+            log.debug("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
 
-        log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
+        log.info("calculateCreditOffers(), return loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return loanOffers;
     }
 }

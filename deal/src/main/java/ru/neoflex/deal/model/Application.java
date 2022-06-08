@@ -50,8 +50,8 @@ public class Application {
     @Column(name = "sign_date")
     private LocalDate signDate;
 
-    @Column(name = "sas_code")
-    private String sasCode;
+    @Column(name = "ses_code")
+    private String sesCode;
 
     @Type(type = "jsonb")
     @Column(name = "status_history", columnDefinition = "jsonb")
