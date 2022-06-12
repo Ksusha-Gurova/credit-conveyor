@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.neoflex.application.DTOForTests;
-import ru.neoflex.application.api.ExceptionHandlers;
+import ru.neoflex.application.api.ExceptionHandler;
 import ru.neoflex.application.service.ApplicationService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +37,7 @@ class ApplicationControllerTest {
     @BeforeEach
     void setUp() {
         mapper.findAndRegisterModules();
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new ExceptionHandlers()).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new ExceptionHandler()).build();
         objectWriter = mapper.writer().withDefaultPrettyPrinter();
 
         Mockito.lenient().when(service.createApplication(DTOForTests.loanApplicationRequestDTOCorrect))
