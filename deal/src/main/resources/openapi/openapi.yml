@@ -66,6 +66,57 @@ paths:
         200:
           description: OK
 
+  /deal/document/{applicationId}/send:
+    post:
+      tags:
+        - deal
+      summary: запрос на отправку документов
+      operationId: sendDocuments
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+
+  /deal/document/{applicationId}/sign:
+    post:
+      tags:
+        - deal
+      summary: запрос на подписание документов
+      operationId: signDocuments
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+
+  /deal/document/{applicationId}/code:
+    post:
+      tags:
+        - deal
+      summary: подписание документов
+      operationId: signDocumentsSesCode
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+
 components:
   schemas:
     LoanApplicationRequestDTO:
@@ -327,9 +378,6 @@ components:
           $ref: "#/components/schemas/EmploymentDTO"
         account:
           type: string
-
-
-
 
     Gender:
       type: string

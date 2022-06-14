@@ -11,4 +11,10 @@ public interface DealService {
     void calculateCredit(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO);
 
     List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO);
+
+    void sendDocuments(Long applicationId);
+
+    void signDocuments(Long applicationId);
+
+    void signDocumentsSesCode(Long applicationId);
 }

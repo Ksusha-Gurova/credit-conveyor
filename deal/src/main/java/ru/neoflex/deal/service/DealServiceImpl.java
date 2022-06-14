@@ -4,8 +4,11 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.model.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.neoflex.deal.client.ConveyorClient;
+import ru.neoflex.deal.client.KafkaClient;
+import ru.neoflex.deal.client.dto.EmailMessage;
 import ru.neoflex.deal.mapper.ApplicationMapper;
 import ru.neoflex.deal.mapper.ClientMapper;
 import ru.neoflex.deal.mapper.CreditMapper;
@@ -42,6 +45,14 @@ public class DealServiceImpl implements DealService{
     private final CreditMapper creditMapper;
     private final EmploymentMapper employmentMapper;
     private final ConveyorClient conveyorClient;
+    private final KafkaClient kafkaClient;
+
+    @Value("${kafka.topics.finish-registration}") private String topicFinishRegistration;
+    @Value("${kafka.topics.create-documents}") private String topicCreateDocuments;
+    @Value("${kafka.topics.send-documents}") private String topicSendDocuments;
+    @Value("${kafka.topics.send-ses}") private String topicSendSes;
+    @Value("${kafka.topics.credit-issued}") private String topicCreditIssued;
+    @Value("${kafka.topics.application-denied}") private String topicApplicationDenied;
 
     @Override
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
@@ -64,6 +75,13 @@ public class DealServiceImpl implements DealService{
 
         applicationRepository.save(application);
         log.info("applyOffer(), сохраняем заявку в базу");
+
+        EmailMessage finishRegistrationEmailDTO = EmailMessage.builder()
+                .address(application.getClient().getEmail())
+                .theme(EmailMessage.ThemeEnum.FINISH_REGISTRATION)
+                .applicationId(application.getId())
+                .build();
+        kafkaClient.send(topicFinishRegistration, finishRegistrationEmailDTO);
     }
 
     @Override
@@ -133,6 +151,13 @@ public class DealServiceImpl implements DealService{
                 .add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(), ChangeType.AUTOMATIC));
         application = applicationRepository.save(application);
         log.debug("calculateCredit(), обновляем statusHistory и сохраняем измененную заявку в базу, application = {}", application);
+
+        EmailMessage createDocumentsEmailDTO = EmailMessage.builder()
+                .address(application.getClient().getEmail())
+                .theme(EmailMessage.ThemeEnum.CREATE_DOCUMENTS)
+                .applicationId(application.getId())
+                .build();
+        kafkaClient.send(topicCreateDocuments, createDocumentsEmailDTO);
     }
 
     @Override
@@ -153,5 +178,20 @@ public class DealServiceImpl implements DealService{
 
         log.info("calculateCreditOffers(), return loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return loanOffers;
+    }
+
+    @Override
+    public void sendDocuments(Long applicationId) {
+
+    }
+
+    @Override
+    public void signDocuments(Long applicationId) {
+
+    }
+
+    @Override
+    public void signDocumentsSesCode(Long applicationId) {
+
     }
 }

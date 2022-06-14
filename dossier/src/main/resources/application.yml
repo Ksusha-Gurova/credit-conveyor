@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_HOST_NAME:localhost:9093}
+      group-id: dossier
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "credit.conveyor.ksu"
+    password: "bgipduuoruqonabs"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+kafka:
+  topics:
+    finish-registration: finish-registration
+    create-documents: create-documents
+    send-documents: send-documents
+    send-ses: send-ses
+    credit-issued: credit-issued
+    application-denied: application-denied

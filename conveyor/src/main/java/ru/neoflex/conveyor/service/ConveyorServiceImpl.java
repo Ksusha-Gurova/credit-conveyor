@@ -356,7 +356,7 @@ public class ConveyorServiceImpl implements ConveyorService{
 
     @Deprecated
     void ageVerification(LocalDate birthdate){
-        if (ChronoUnit.YEARS.between(birthdate, LocalDate.now()) < PRESCORING_MATURITY_AGE){
+         if (ChronoUnit.YEARS.between(birthdate, LocalDate.now()) < PRESCORING_MATURITY_AGE){
             log.debug("ageVerification(), из-за несовершеннолетнего возраста заявка отклоняется");
             throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
         }

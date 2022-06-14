@@ -36,4 +36,22 @@ public class DealControllerImpl implements DealApi {
         log.info("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return ResponseEntity.ok(dealService.calculateCreditOffers(loanApplicationRequestDTO));
     }
+
+    @Override
+    public ResponseEntity<Void> sendDocuments(Long applicationId) {
+        dealService.sendDocuments(applicationId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> signDocuments(Long applicationId) {
+        dealService.signDocuments(applicationId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> signDocumentsSesCode(Long applicationId) {
+        dealService.signDocumentsSesCode(applicationId);
+        return ResponseEntity.ok().build();
+    }
 }

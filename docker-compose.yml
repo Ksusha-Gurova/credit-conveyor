@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: credit-conveyor-zookeeper
+    expose:
+      - 2181
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: credit-conveyor-kafka
+    ports:
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://localhost:9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+    volumes:
+      - credit-conveyor-kafka:/kafka
+
+  postgres:
+    container_name: credit-conveyor-db
+    image: postgres:alpine3.14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    restart: unless-stopped
+    volumes:
+      - credit-conveyor-data:/var/lib/postgresql/data/
+
+volumes:
+  credit-conveyor-kafka:
+  credit-conveyor-data:
