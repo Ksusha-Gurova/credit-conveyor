@@ -45,10 +45,7 @@ public class ConveyorServiceImpl implements ConveyorService{
     public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
         log.debug("calculateCreditOffers(), loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
 
-        if (ChronoUnit.YEARS.between(loanApplicationRequestDTO.getBirthdate(), LocalDate.now()) < PRESCORING_MATURITY_AGE){
-            log.debug("calculateCreditOffers(), из-за несовершеннолетнего возраста заявка отклоняется");
-            throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
-        }
+        ageVerification(loanApplicationRequestDTO.getBirthdate());
 
         LoanOfferDTO insuranceTrueSalaryTrue = createOffer(1L,loanApplicationRequestDTO, true, true);
         log.debug("calculateCreditOffers(), создали предложение с включенной страховкой и для зарплатного клиента, insuranceTrueSalaryTrue = {}", insuranceTrueSalaryTrue);
@@ -355,5 +352,13 @@ public class ConveyorServiceImpl implements ConveyorService{
                 .setScale(3, RoundingMode.HALF_UP);
         log.info("calculatePsk(), расчитали значение psk, return psk = {}", psk);
         return psk;
+    }
+
+    @Deprecated
+    void ageVerification(LocalDate birthdate){
+        if (ChronoUnit.YEARS.between(birthdate, LocalDate.now()) < PRESCORING_MATURITY_AGE){
+            log.debug("ageVerification(), из-за несовершеннолетнего возраста заявка отклоняется");
+            throw new IllegalArgumentException("Ваш возраст менее 18. Заявка не может быть выполнена");
+        }
     }
 }

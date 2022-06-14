@@ -22,7 +22,7 @@ public class Employment {
     @Column(name = "employment_status", nullable = false)
     private String employmentStatus;
 
-    @Column(name = "employer", nullable = false)
+    @Column(name = "employer_inn", nullable = false)
     private String employerINN;
 
     @Column(name = "salary", nullable = false)

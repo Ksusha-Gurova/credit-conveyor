@@ -20,14 +20,15 @@ import ru.neoflex.deal.repository.CreditRepository;
 import ru.neoflex.deal.repository.EmploymentRepository;
 
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class DealServiceImpl implements DealService{
 
     private static final int BAD_REQUEST_STATUS = 400;
