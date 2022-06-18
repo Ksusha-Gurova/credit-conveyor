@@ -1,12 +1,16 @@
 package ru.neoflex.dossier.consumers.dto;
 
-import lombok.*;
 
-@ToString
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Data
 public class EmailMessage {
     private String address;
     private ThemeEnum theme;
@@ -14,7 +18,6 @@ public class EmailMessage {
 
     @Getter
     @AllArgsConstructor
-    @ToString
     public enum ThemeEnum {
 
         FINISH_REGISTRATION("Finish-registration"),

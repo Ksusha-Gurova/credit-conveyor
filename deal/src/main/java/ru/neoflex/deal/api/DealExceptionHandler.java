@@ -16,4 +16,11 @@ public class DealExceptionHandler {
                 .message(e.getMessage())
                 .build();
     }
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ErrorMessage handlerIllegalArgumentException (IllegalArgumentException e){
+        return ErrorMessage.builder()
+                .message(e.getMessage())
+                .build();
+    }
 }

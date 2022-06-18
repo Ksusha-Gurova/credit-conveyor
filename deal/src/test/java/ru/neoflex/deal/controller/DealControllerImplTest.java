@@ -71,4 +71,6 @@ class DealControllerImplTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectWriter.writeValueAsString(DTOForTests.loanOfferDTOListFromLoanApplicationRequestDTOCorrect)));
     }
+
+
 }
