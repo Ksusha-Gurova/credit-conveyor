@@ -4,8 +4,11 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.model.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.neoflex.deal.client.ConveyorClient;
+import ru.neoflex.deal.client.KafkaClient;
+import ru.neoflex.deal.client.dto.EmailMessage;
 import ru.neoflex.deal.mapper.ApplicationMapper;
 import ru.neoflex.deal.mapper.ClientMapper;
 import ru.neoflex.deal.mapper.CreditMapper;
@@ -24,6 +27,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -32,6 +36,9 @@ import java.util.List;
 public class DealServiceImpl implements DealService{
 
     private static final int BAD_REQUEST_STATUS = 400;
+    private static final String CLIENT_DENIED = "client_denied";
+    private static final String DOCUMENTS_CREATED = "documents_created";
+
 
     private final ApplicationRepository applicationRepository;
     private final ClientRepository clientRepository;
@@ -42,6 +49,14 @@ public class DealServiceImpl implements DealService{
     private final CreditMapper creditMapper;
     private final EmploymentMapper employmentMapper;
     private final ConveyorClient conveyorClient;
+    private final KafkaClient kafkaClient;
+
+    @Value("${kafka.topics.finish-registration}") private String topicFinishRegistration;
+    @Value("${kafka.topics.create-documents}") private String topicCreateDocuments;
+    @Value("${kafka.topics.send-documents}") private String topicSendDocuments;
+    @Value("${kafka.topics.send-ses}") private String topicSendSes;
+    @Value("${kafka.topics.credit-issued}") private String topicCreditIssued;
+    @Value("${kafka.topics.application-denied}") private String topicApplicationDenied;
 
     @Override
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
@@ -64,6 +79,14 @@ public class DealServiceImpl implements DealService{
 
         applicationRepository.save(application);
         log.info("applyOffer(), сохраняем заявку в базу");
+
+        EmailMessage finishRegistrationEmailDTO = EmailMessage.builder()
+                .address(application.getClient().getEmail())
+                .theme(EmailMessage.ThemeEnum.FINISH_REGISTRATION)
+                .applicationId(application.getId())
+                .build();
+        kafkaClient.send(topicFinishRegistration, finishRegistrationEmailDTO);
+        log.info("applyOffer(), отправляем по kafka finishRegistrationEmailDTO = {}", finishRegistrationEmailDTO);
     }
 
     @Override
@@ -108,6 +131,7 @@ public class DealServiceImpl implements DealService{
         application.getClient().setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus().getValue());
         application.getClient().setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
         application.getClient().setEmployment(employment);
+        application.getClient().setAccount(finishRegistrationRequestDTO.getAccount());
         Client client = clientRepository.save(application.getClient());
         log.debug("calculateCredit(), добавляем информацию в таблицу client из finishRegistrationRequestDTO, client = {}", client);
 
@@ -122,6 +146,15 @@ public class DealServiceImpl implements DealService{
             application.setStatus(ApplicationStatus.CC_APPROVED);
             application.setCredit(credit);
             log.debug("calculateCredit(), сохраняем credit в application  и обновляем статус на CC_APPROVED");
+
+            EmailMessage createDocumentsEmailDTO = EmailMessage.builder()
+                    .address(application.getClient().getEmail())
+                    .theme(EmailMessage.ThemeEnum.CREATE_DOCUMENTS)
+                    .applicationId(application.getId())
+                    .build();
+            kafkaClient.send(topicCreateDocuments, createDocumentsEmailDTO);
+            log.info("calculateCredit(), отправили по kafka createDocumentsEmailDTO = {}", createDocumentsEmailDTO);
+
         } catch (FeignException e) {
             if (e.status() == BAD_REQUEST_STATUS) {
                 application.setStatus(ApplicationStatus.CC_DENIED);
@@ -133,6 +166,7 @@ public class DealServiceImpl implements DealService{
                 .add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(), ChangeType.AUTOMATIC));
         application = applicationRepository.save(application);
         log.debug("calculateCredit(), обновляем statusHistory и сохраняем измененную заявку в базу, application = {}", application);
+
     }
 
     @Override
@@ -153,5 +187,120 @@ public class DealServiceImpl implements DealService{
 
         log.info("calculateCreditOffers(), return loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
         return loanOffers;
+    }
+
+    @Override
+    public void sendDocuments(Long applicationId) {
+        log.debug("sendDocuments(), applicationId = {}", applicationId);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
+        log.debug("sendDocuments(), подгружаеем из базы application = {}", application);
+
+        application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
+        application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
+        applicationRepository.save(application);
+        log.debug("sendDocuments(), обновляем в заявке статус и историю статусов, сохраняемв базу обновленную application = {}", application);
+
+        EmailMessage sendDocumentsEmailDTO = EmailMessage.builder()
+                .address(application.getClient().getEmail())
+                .theme(EmailMessage.ThemeEnum.SEND_DOCUMENTS)
+                .applicationId(application.getId())
+                .build();
+        kafkaClient.send(topicSendDocuments, sendDocumentsEmailDTO);
+        log.info("sendDocuments(), отправляем по kafka sendDocumentsEmailDTO = {}", sendDocumentsEmailDTO);
+    }
+
+    @Override
+    public void signDocuments(Long applicationId) {
+        log.debug("signDocuments(), applicationId = {}", applicationId);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
+        log.debug("signDocuments(), подгружаеем из базы application = {}", application);
+
+        Random random = new Random();
+        String sesCode = String.format("%04d", random.nextInt(10000));
+        application.setSesCode(sesCode);
+        applicationRepository.save(application);
+        log.debug("signDocuments(), генерируем ПЭП и добавляем в заявку, сохраняем в базу обновленную application = {}", application);
+
+        EmailMessage sendSesEmailDTO = EmailMessage.builder()
+                .address(application.getClient().getEmail())
+                .theme(EmailMessage.ThemeEnum.SEND_SES)
+                .applicationId(application.getId())
+                .build();
+        kafkaClient.send(topicSendSes, sendSesEmailDTO);
+        log.info("signDocuments(), отправляем по kafka sendSesEmailDTO = {}", sendSesEmailDTO);
+    }
+
+    @Override
+    public void signDocumentsSesCode(Long applicationId, String sesCode) {
+        log.debug("signDocumentsSesCode(), applicationId = {}, sesCode = {}", applicationId, sesCode);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
+        log.debug("signDocumentsSesCode(), подгружаеем из базы application = {}", application);
+
+        if (application.getSesCode().equals(sesCode)){
+            application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
+            application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
+            applicationRepository.save(application);
+            log.debug("signDocumentsSesCode(), обновляем статус заявки на DOCUMENT_SIGNED, " +
+                    "обновляем историю статусов, " +
+                    "сохраняем обновления в базу,application = {}", application);
+
+            EmailMessage creditIssuedEmailDTO = EmailMessage.builder()
+                    .address(application.getClient().getEmail())
+                    .theme(EmailMessage.ThemeEnum.CREDIT_ISSUED)
+                    .applicationId(application.getId())
+                    .build();
+            kafkaClient.send(topicCreditIssued, creditIssuedEmailDTO);
+            log.info("signDocumentsSesCode(), отправляем по kafka creditIssuedEmailDTO = {}", creditIssuedEmailDTO);
+
+        } else throw new IllegalArgumentException("Введенный код не верен");
+    }
+
+    @Override
+    public ApplicationDTO getApplication(Long applicationId) {
+        log.debug("getApplication(), applicationId = {}", applicationId);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
+        log.debug("getApplication(), подгружаеем из базы, application = {}", application);
+
+        ApplicationDTO applicationDTO = applicationMapper.mapEntityToDto(application);
+        log.debug("getApplication(), преобразуем application в dto, return applicationDTO = {}", applicationDTO);
+
+        return applicationDTO;
+    }
+
+    @Override
+    public void updateStatus(Long applicationId, String status) {
+        log.debug("updateStatus(), applicationId = {}, status = {}", applicationId, status);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
+        log.debug("updateStatus(), подгружаеем из базы, application = {}", application);
+
+        if (status.equalsIgnoreCase(DOCUMENTS_CREATED)){
+            application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
+            log.debug("updateStatus(), обновляем статус заявки");
+
+        } else if (status.equalsIgnoreCase(CLIENT_DENIED)){
+            application.setStatus(ApplicationStatus.CLIENT_DENIED);
+            log.debug("updateStatus(), обновляем статус заявки");
+
+            EmailMessage applicationDeniedEmailDTO = EmailMessage.builder()
+                    .address(application.getClient().getEmail())
+                    .theme(EmailMessage.ThemeEnum.APPLICATION_DENIED)
+                    .applicationId(application.getId())
+                    .build();
+            kafkaClient.send(topicApplicationDenied, applicationDeniedEmailDTO);
+            log.info("updateStatus(), отправляем по kafka applicationDeniedEmailDTO = {}", applicationDeniedEmailDTO);
+        }
+        application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
+        applicationRepository.save(application);
+        log.debug("updateStatus(), обновляем историю статуса, сохраняем все изменения в базу, application = {}", application);
     }
 }

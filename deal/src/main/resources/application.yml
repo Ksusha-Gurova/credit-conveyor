@@ -14,3 +14,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST_NAME:localhost:9093}
+
+kafka:
+  topics:
+    finish-registration: finish-registration
+    create-documents: create-documents
+    send-documents: send-documents
+    send-ses: send-ses
+    credit-issued: credit-issued
+    application-denied: application-denied
+
+
