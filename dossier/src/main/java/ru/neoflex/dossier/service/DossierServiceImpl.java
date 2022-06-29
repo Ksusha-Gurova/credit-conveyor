@@ -145,7 +145,7 @@ public class DossierServiceImpl implements DossierService{
                 "Добрый день!" +
                 "\nВаша заявка №" + applicationId + " предварительно одобрена." +
                 "\nПожалуйста перейдите по ссылке ниже для дальнейшего оформдения кредита:" +
-                "\nhttp://localhost:8081/swagger-ui/index.html#/deal/calculateCredit";
+                "\nhttp://localhost:8084/swagger-ui/index.html#/application/finishRegistration";
         log.debug("createTextForFinishRegistration(), return messageText = {}", messageText);
         return messageText;
     }
@@ -157,7 +157,7 @@ public class DossierServiceImpl implements DossierService{
                 "Добрый день!" +
                 "\nВаша заявка №" + applicationId + " полностью одобрена." +
                 "\nПерейдите по ссылке ниже для формирования документов:" +
-                "\nhttp://localhost:8081/swagger-ui/index.html#/deal/sendDocuments";
+                "\nhttp://localhost:8084/swagger-ui/index.html#/document/createDocumentRequest";
         log.debug("createTextForCreateDocuments(), return messageText = {}", messageText);
         return messageText;
     }
@@ -169,10 +169,9 @@ public class DossierServiceImpl implements DossierService{
                 "Добрый день!" +
                 "\nВаши документы по заявке №" + applicationId + " во вложении." +
                 "\nПерейдите по ссылке ниже для запроса на подписание документов:" +
-                "\nhttp://localhost:8081/swagger-ui/index.html#/deal/signDocuments" +
+                "\nhttp://localhost:8084/swagger-ui/index.html#/document/signDocumentsRequest" +
                 "\n" +
-                "\nЕсли вы хотите отклонить заявку перейдите по следующей ссылке и укажите client_denied:" +
-                "\nhttp://localhost:8081/swagger-ui/index.html#/deal/updateStatus";
+                "\nЕсли вы хотите отклонить заявку перейдите по той же ссылке и укажите client_denied:";
         log.debug("createTextForSendDocument(), return messageText = {}", messageText);
         return messageText;
     }
@@ -184,7 +183,7 @@ public class DossierServiceImpl implements DossierService{
                 "Добрый день!" +
                 "\nВаш ses-code: " + sesCode +
                 "\nПройдите по ссылки ниже для завершения оформления кредита и введите ses-code" +
-                "\nhttp://localhost:8081/swagger-ui/index.html#/deal/signDocumentsSesCode";
+                "\nhttp://localhost:8084/swagger-ui/index.html#/document/verifySesCodeRequest";
         log.debug("createTextForSendSes(), return messageText = {}", messageText);
         return messageText;
     }

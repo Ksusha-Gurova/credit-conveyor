@@ -167,6 +167,23 @@ paths:
         200:
           description: OK
 
+  /deal/admin/application:
+    get:
+      tags:
+        - deal
+      summary: получить все заявки
+      operationId: getAllApplication
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApplicationDTO"
+
+
 components:
   schemas:
     ApplicationDTO:
@@ -539,6 +556,14 @@ components:
 
     FinishRegistrationRequestDTO:
       type: object
+      required:
+        - gender
+        - maritalStatus
+        - dependentAmount
+        - passportIssueDate
+        - passportIssueBranch
+        - employment
+        - account
       properties:
         gender:
           $ref: "#/components/schemas/Gender"

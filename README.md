@@ -4,7 +4,7 @@
 Сервис для расчета кредитных условий
 
 ### Документация:
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8084/swagger-ui/index.html
 
 ### Автор:
 Гурова Ксения

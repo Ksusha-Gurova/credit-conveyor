@@ -71,4 +71,10 @@ public class DealControllerImpl implements DealApi {
         dealService.updateStatus(applicationId, status);
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    public ResponseEntity<List<ApplicationDTO>> getAllApplication() {
+        log.info("getAllApplication()");
+        return ResponseEntity.ok(dealService.getAllApplication());
+    }
 }

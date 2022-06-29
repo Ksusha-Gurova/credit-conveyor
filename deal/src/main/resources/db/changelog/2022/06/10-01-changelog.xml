@@ -88,7 +88,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="position" type="VARCHAR">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="work_experience_total" type="INT">
                 <constraints nullable="false"/>
