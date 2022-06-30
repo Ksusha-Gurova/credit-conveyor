@@ -1,5 +1,6 @@
 package ru.neoflex.application.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.model.LoanApplicationRequestDTO;
@@ -22,8 +23,13 @@ public class ApplicationServiceImpl implements ApplicationService{
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
         log.debug("applyOffer(), loanOfferDTO = {}", loanOfferDTO);
 
-        dealClient.applyOffer(loanOfferDTO);
-        log.debug("applyOffer(), отправляем запрос /deal/offer");
+        try {
+            dealClient.applyOffer(loanOfferDTO);
+            log.debug("applyOffer(), отправляем запрос /deal/offer");
+        } catch (FeignException e) {
+            log.error("applyOffer(), ошибка при обработке запроса с выбором одного из предложений: {}", e.getMessage());
+        }
+
     }
 
     @Override

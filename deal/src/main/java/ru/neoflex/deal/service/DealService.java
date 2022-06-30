@@ -22,4 +22,6 @@ public interface DealService {
     ApplicationDTO getApplication(Long applicationId);
 
     void updateStatus(Long applicationId, String status);
+
+    List<ApplicationDTO> getAllApplication();
 }

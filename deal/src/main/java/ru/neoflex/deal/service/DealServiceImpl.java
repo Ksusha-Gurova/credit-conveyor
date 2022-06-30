@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -302,5 +303,13 @@ public class DealServiceImpl implements DealService{
         application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
         applicationRepository.save(application);
         log.debug("updateStatus(), обновляем историю статуса, сохраняем все изменения в базу, application = {}", application);
+    }
+
+    @Override
+    public List<ApplicationDTO> getAllApplication() {
+        List<ApplicationDTO> allApplication =
+                applicationRepository.findAll().stream().map(applicationMapper::mapEntityToDto).collect(Collectors.toList());
+        log.debug("getAllApplication(), подгрузили из базы все заявки, return allApplication = {}", allApplication);
+        return allApplication;
     }
 }

@@ -1,0 +1,281 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Gateway
+servers:
+  - url: localhost:8084
+paths:
+  /application:
+    post:
+      summary: Запрос на расчёт возможных условий кредита
+      operationId: createLoanApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanApplicationRequestDTO"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanOfferDTO"
+
+  /application/apply:
+    post:
+      summary: выбор одного из предложений
+      operationId: applyOffer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanOfferDTO"
+      responses:
+        200:
+          description: OK
+
+  /application/registration/{applicationId}:
+    post:
+      summary: завершение регистрации
+      operationId: finishRegistration
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinishRegistrationRequestDTO"
+      responses:
+        200:
+          description: OK
+
+  /document/{applicationId}:
+    post:
+      summary: запрос на отправку документов
+      operationId: createDocumentRequest
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+
+  /document/{applicationId}/sign:
+    post:
+      summary: запрос на подписание документов или отказ
+      operationId: signDocumentsRequest
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+
+  /document/{applicationId}/sign/code:
+    post:
+      summary: запрос на проверку ses-кода
+      operationId: verifySesCodeRequest
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+
+
+
+components:
+  schemas:
+    LoanApplicationRequestDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - email
+        - birthdate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          type: number
+          minimum: 10000
+        term:
+          type: integer
+          minimum: 6
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        email:
+          type: string
+          pattern: ^[\w\.]{2,50}@[\w\.]{2,20}
+        birthdate:
+          type: string
+          format: date
+        passportSeries:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^[0-9]+$
+        passportNumber:
+          type: string
+          minLength: 6
+          maxLength: 6
+          pattern: ^[0-9]+$
+
+    LoanOfferDTO:
+      type: object
+      required:
+        - applicationId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        applicationId:
+          type: integer
+          format: int64
+        requestedAmount:
+          type: number
+        totalAmount:
+          type: number
+        term:
+          type: integer
+        monthlyPayment:
+          type: number
+        rate:
+          type: number
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+
+    EmploymentDTO:
+      type: object
+      required:
+        - employmentStatus
+        - employerINN
+        - salary
+        - workExperienceTotal
+        - workExperienceCurrent
+      properties:
+        employmentStatus:
+          $ref: "#/components/schemas/EmploymentStatus"
+        employerINN:
+          type: string
+        salary:
+          type: number
+        position:
+          $ref: "#/components/schemas/Position"
+        workExperienceTotal:
+          type: integer
+        workExperienceCurrent:
+          type: integer
+
+    FinishRegistrationRequestDTO:
+      type: object
+      required:
+        - gender
+        - maritalStatus
+        - dependentAmount
+        - passportIssueDate
+        - passportIssueBranch
+        - employment
+        - account
+      properties:
+        gender:
+          $ref: "#/components/schemas/Gender"
+        maritalStatus:
+          $ref: "#/components/schemas/MaritalStatus"
+        dependentAmount:
+          type: integer
+        passportIssueDate:
+          type: string
+          format: date
+        passportIssueBranch:
+          type: string
+        employment:
+          $ref: "#/components/schemas/EmploymentDTO"
+        account:
+          type: string
+
+    Gender:
+      type: string
+      enum:
+        - male
+        - female
+        - non_binary
+
+    MaritalStatus:
+      type: string
+      enum:
+        - married
+        - divorced
+        - single
+        - widow_widower
+
+    EmploymentStatus:
+      type: string
+      enum:
+        - unemployed
+        - self_employed
+        - employed
+        - business_owner
+
+    Position:
+      type: string
+      enum:
+        - worker
+        - mid_manager
+        - top_manager
+        - owner
