@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.neoflex.dossier.client.dto.ApplicationDTO;
 
-@FeignClient(value = "deal", url = "http://localhost:8081/")
+@FeignClient(value = "deal", url = "${application.dealHost}")
 public interface DealClient {
     @RequestMapping(method = RequestMethod.GET, value = "/deal/admin/application/{applicationId}")
     ApplicationDTO getApplication(@PathVariable Long applicationId);

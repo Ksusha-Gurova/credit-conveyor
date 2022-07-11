@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient(value = "application", url = "http://localhost:8082/")
+@FeignClient(value = "application", url = "${application.applicationHost}")
 public interface ApplicationClient {
     @RequestMapping(method = RequestMethod.POST, value = "/application")
     List<LoanOfferDTO> createApplicationRequest(LoanApplicationRequestDTO loanApplicationRequestDTO);

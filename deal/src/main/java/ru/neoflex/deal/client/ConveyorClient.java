@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient(value = "conveyor", url = "http://localhost:8080/")
+@FeignClient(value = "conveyor", url = "${application.conveyorHost}")
 public interface ConveyorClient {
     @RequestMapping(method = RequestMethod.POST, value = "/conveyor/offers")
     List<LoanOfferDTO> getLoanOffers(LoanApplicationRequestDTO loanApplicationRequestDTO);

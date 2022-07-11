@@ -1,5 +1,9 @@
 server:
   port: ${SERVER_PORT:8081}
+
+application:
+  conveyorHost: ${CONVEYOR_HOST:http://localhost:8080/}
+
 spring:
   datasource:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/postgres}
@@ -20,11 +24,11 @@ spring:
 
 kafka:
   topics:
-    finish-registration: finish-registration
-    create-documents: create-documents
-    send-documents: send-documents
-    send-ses: send-ses
-    credit-issued: credit-issued
-    application-denied: application-denied
+    finish-registration: ${FINISH_REGISTRATION}
+    create-documents: ${CREATE_DOCUMENTS}
+    send-documents: ${SEND_DOCUMENTS}
+    send-ses: ${SEND_SES}
+    credit-issued: ${CREDIT_ISSUED}
+    application-denied: ${APPLICATION_DENIED}
 
 
