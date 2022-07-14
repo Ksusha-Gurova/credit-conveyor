@@ -38,5 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 #        run: cd ./application/ && mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Ksusha-Gurova_credit-conveyor
-        run: cd ./application/ && mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Ksusha-Gurova_credit-conveyor -Dsonar.coverage.jacoco.xmlReportPaths=./target/site/jacoco/jacoco.xml
+#        run: cd ./application/ && mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Ksusha-Gurova_credit-conveyor -Dsonar.coverage.jacoco.xmlReportPaths=./target/site/jacoco/jacoco.xml
+        run: cd ./application/ && mvn -B verify sonar:sonar -Dsonar.projectKey=Ksusha-Gurova_credit-conveyor -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=./target/site/jacoco/jacoco.xml
 #          run: cd ./application/ && mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=credit-conveyor -Dsonar.organization=Ksusha-Gurova -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
