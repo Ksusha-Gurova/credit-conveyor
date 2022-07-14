@@ -18,6 +18,8 @@
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <start-class>ru.neoflex.gateway.GatewayApplication</start-class>
 
+        <sonar.organization>ksusha-gurova</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencies>
         <dependency>
@@ -149,6 +151,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.0.2155</version>
             </plugin>
         </plugins>
     </build>
