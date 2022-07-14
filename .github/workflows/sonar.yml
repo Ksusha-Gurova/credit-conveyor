@@ -1,10 +1,11 @@
-name: Build
+name: Sonar
 on:
   push:
     branches:
-      - master
+      - 'develop'
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - '*'
 jobs:
   build:
     name: Build
@@ -27,17 +28,14 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze application
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: cd ./application/ && mvn -B verify sonar:sonar -Dsonar.projectKey=Ksusha-Gurova_credit-conveyor -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=./target/site/jacoco/jacoco.xml
+
       - name: Build and analyze application
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

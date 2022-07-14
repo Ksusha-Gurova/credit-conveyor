@@ -8,21 +8,8 @@
     <packaging>pom</packaging>
 
     <properties>
-<!--        <sonar.version>3.9.1.2184</sonar.version>-->
         <sonar.organization>ksusha-gurova</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-<!--        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>-->
-<!--        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>-->
-<!--        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>-->
-<!--        <sonar.language>java</sonar.language>-->
-<!--        <sonar.exclusions>-->
-<!--            file:**/target/generated-sources/**,-->
-<!--            file:**/target/generated-test-sources/**,-->
-<!--            file:**/target/test-classes/**,-->
-<!--            file:**/model/*.java,-->
-<!--            file:**/*Config.java,-->
-<!--            file:**/*App.java,-->
-<!--        </sonar.exclusions>-->
     </properties>
 
     <dependencies>
@@ -60,38 +47,6 @@
         <module>dossier</module>
         <module>gateway</module>
     </modules>
-
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>sonar</id>-->
-<!--            <properties>-->
-<!--                <sonar.host.url>https://sonarcloud.io</sonar.host.url>-->
-<!--                <sonar.organization>magicsoup</sonar.organization>-->
-<!--                <sonar.projectKey>MagicSoup_SpringJOOQ</sonar.projectKey>-->
-<!--                <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>-->
-<!--            </properties>-->
-<!--            <activation>-->
-<!--                <activeByDefault>false</activeByDefault>-->
-<!--            </activation>-->
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.sonarsource.scanner.maven</groupId>-->
-<!--                        <artifactId>sonar-maven-plugin</artifactId>-->
-<!--                        <version>3.2</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <phase>verify</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>sonar</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
-<!--        </profile>-->
-<!--    </profiles>-->
 
     <build>
         <plugins>
