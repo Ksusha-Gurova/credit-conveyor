@@ -5,10 +5,7 @@ on:
       - '*'
   pull_request:
     branches:
-      - 'master'
-      - 'develop'
       - 'feature/devops'
-      - 'devops_test'
 
 jobs:
   build:
