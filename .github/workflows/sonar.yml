@@ -2,7 +2,7 @@ name: Sonar
 on:
   push:
     branches:
-      - 'feature/devops'
+      - 'devops_test'
   pull_request:
     branches:
       - '*'
