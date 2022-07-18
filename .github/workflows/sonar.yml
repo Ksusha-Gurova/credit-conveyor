@@ -4,7 +4,8 @@ on:
     branches:
       - '*'
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - '*'
 jobs:
   build:
     name: Build
