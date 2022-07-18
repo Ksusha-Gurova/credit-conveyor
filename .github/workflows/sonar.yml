@@ -5,8 +5,10 @@ on:
       - '*'
   pull_request:
     branches:
-      - '*'
-    types: [opened, synchronize, reopened]
+      - 'master'
+      - 'develop'
+      - 'feature/devops'
+      - 'devops_test'
 
 jobs:
   build:
