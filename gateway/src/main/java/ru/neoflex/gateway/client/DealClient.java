@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
-@FeignClient(value = "deal", url = "http://localhost:8081/")
+@FeignClient(value = "deal", url = "${application.dealHost}")
 public interface DealClient {
     @RequestMapping(method = RequestMethod.PUT, value = "/deal/calculate/{applicationId}")
     void calculateCreditRequest(@PathVariable Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO);

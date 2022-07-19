@@ -122,7 +122,7 @@ public class DTOForTests {
             .workExperienceCurrent(12)
             .build();
 
-    private static final List<PaymentScheduleElement> scheduleElementList = List.of(
+    public static final List<PaymentScheduleElement> scheduleElementList = List.of(
             PaymentScheduleElement.builder()
                     .number(0)
                     .date(LocalDate.now())

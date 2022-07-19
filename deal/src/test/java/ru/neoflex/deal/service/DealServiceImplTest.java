@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.neoflex.deal.DTOForTests;
 import ru.neoflex.deal.client.ConveyorClient;
+import ru.neoflex.deal.client.KafkaClient;
 import ru.neoflex.deal.mapper.ApplicationMapper;
 import ru.neoflex.deal.mapper.ClientMapper;
 import ru.neoflex.deal.mapper.CreditMapper;
@@ -35,6 +36,7 @@ class DealServiceImplTest {
     @Mock private CreditMapper creditMapper;
     @Mock private EmploymentMapper employmentMapper;
     @Mock private ConveyorClient conveyorClient;
+    @Mock private KafkaClient kafkaClient;
 
     @InjectMocks
     private DealServiceImpl dealService;

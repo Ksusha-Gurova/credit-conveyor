@@ -40,7 +40,6 @@ public class DealServiceImpl implements DealService{
     private static final String CLIENT_DENIED = "client_denied";
     private static final String DOCUMENTS_CREATED = "documents_created";
 
-
     private final ApplicationRepository applicationRepository;
     private final ClientRepository clientRepository;
     private final CreditRepository creditRepository;
@@ -51,6 +50,7 @@ public class DealServiceImpl implements DealService{
     private final EmploymentMapper employmentMapper;
     private final ConveyorClient conveyorClient;
     private final KafkaClient kafkaClient;
+    private final Random random = new Random();
 
     @Value("${kafka.topics.finish-registration}") private String topicFinishRegistration;
     @Value("${kafka.topics.create-documents}") private String topicCreateDocuments;
@@ -220,7 +220,6 @@ public class DealServiceImpl implements DealService{
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
         log.debug("signDocuments(), подгружаеем из базы application = {}", application);
 
-        Random random = new Random();
         String sesCode = String.format("%04d", random.nextInt(10000));
         application.setSesCode(sesCode);
         applicationRepository.save(application);
