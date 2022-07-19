@@ -50,7 +50,7 @@ public class DealServiceImpl implements DealService{
     private final EmploymentMapper employmentMapper;
     private final ConveyorClient conveyorClient;
     private final KafkaClient kafkaClient;
-    private final Random random;
+    private final Random random = new Random();
 
     @Value("${kafka.topics.finish-registration}") private String topicFinishRegistration;
     @Value("${kafka.topics.create-documents}") private String topicCreateDocuments;
