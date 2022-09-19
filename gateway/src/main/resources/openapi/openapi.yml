@@ -77,7 +77,7 @@ paths:
 
   /document/{applicationId}/sign:
     post:
-      summary: запрос на подписание документов или отказ
+      summary: запрос на подписание документов
       operationId: signDocumentsRequest
       parameters:
         - name: applicationId
@@ -86,11 +86,6 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        content:
-          text/plain:
-            schema:
-              type: string
       responses:
         200:
           description: OK
@@ -116,28 +111,113 @@ paths:
         200:
           description: OK
 
+  /document/{applicationId}/denied:
+    post:
+      summary: отказ от заявки на кредит
+      operationId: denyOnApplication
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
 
+  /admin/application:
+    get:
+      summary: получить все заявки
+      operationId: getAllApplication
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApplicationDTO"
+
+  /admin/application/{applicationId}/status:
+    put:
+      summary: изменить статус заявки
+      operationId: updateStatus
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
+
+  /admin/application/{applicationId}:
+    get:
+      summary: получить заявку по id
+      operationId: getApplication
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationDTO"
 
 components:
   schemas:
-    LoanApplicationRequestDTO:
+    ApplicationDTO:
       type: object
       required:
-        - amount
-        - term
         - firstName
         - lastName
         - email
         - birthdate
         - passportSeries
         - passportNumber
+        - passportIssueDate
+        - passportIssueBranch
+        - gender
+        - maritalStatus
+        - dependentAmount
+        - employment
+        - account
+        - amount
+        - term
+        - monthlyPayment
+        - rate
+        - psk
+        - isInsuranceEnabled
+        - isSalaryClient
+        - paymentSchedule
+        - employmentStatus
+        - employerINN
+        - salary
+        - workExperienceTotal
+        - workExperienceCurrent
+        - status
+        - creationDate
+        - appliedOffer
+        - signDate
+        - sesCode
+        - statusHistory
       properties:
-        amount:
-          type: number
-          minimum: 10000
-        term:
-          type: integer
-          minimum: 6
         firstName:
           type: string
           minLength: 2
@@ -169,6 +249,182 @@ components:
           minLength: 6
           maxLength: 6
           pattern: ^[0-9]+$
+        passportIssueDate:
+          type: string
+          format: date
+        passportIssueBranch:
+          type: string
+        gender:
+          type: string
+        maritalStatus:
+          type: string
+        dependentAmount:
+          type: integer
+        employmentStatus:
+          type: string
+        employerINN:
+          type: string
+        salary:
+          type: number
+        position:
+          type: string
+        workExperienceTotal:
+          type: integer
+        workExperienceCurrent:
+          type: integer
+        account:
+          type: string
+        amount:
+          type: number
+        term:
+          type: integer
+        monthlyPayment:
+          type: number
+        rate:
+          type: number
+        psk:
+          type: number
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+        paymentSchedule:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentScheduleElement"
+        status:
+          type: string
+        creationDate:
+          type: string
+          format: date
+        appliedOffer:
+          $ref: "#/components/schemas/LoanOfferDTO"
+        signDate:
+          type: string
+          format: date
+        sesCode:
+          type: string
+        statusHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationStatusHistoryDTO"
+
+    ApplicationStatusHistoryDTO:
+      type: object
+      required:
+        - status
+        - time
+        - changeType
+      properties:
+        status:
+          $ref: "#/components/schemas/ApplicationStatus"
+        time:
+          type: string
+          format: date-time
+        changeType:
+          $ref: "#/components/schemas/ChangeType"
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+
+    ChangeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    PaymentScheduleElement:
+      type: object
+      required:
+        - number
+        - date
+        - totalPayment
+        - interestPayment
+        - debtPayment
+        - remainingDebt
+      properties:
+        number:
+          type: integer
+        date:
+          type: string
+          format: date
+        totalPayment:
+          type: number
+        interestPayment:
+          type: number
+        debtPayment:
+          type: number
+        remainingDebt:
+          type: number
+
+    LoanApplicationRequestDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - email
+        - birthdate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          type: number
+          minimum: 10000
+          example: 183000
+        term:
+          type: integer
+          minimum: 6
+          example: 10
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+          example: Irina
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+          example: Petrova
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+          example: Sergeevna
+        email:
+          type: string
+          pattern: ^[\w\.]{2,50}@[\w\.]{2,20}
+          example: blablabla@gmail.com
+        birthdate:
+          type: string
+          format: date
+          example: 1988-03-20
+        passportSeries:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^[0-9]+$
+          example: 7890
+        passportNumber:
+          type: string
+          minLength: 6
+          maxLength: 6
+          pattern: ^[0-9]+$
+          example: 123456
 
     LoanOfferDTO:
       type: object
@@ -213,14 +469,18 @@ components:
           $ref: "#/components/schemas/EmploymentStatus"
         employerINN:
           type: string
+          example: 12345678900
         salary:
           type: number
+          example: 73000
         position:
           $ref: "#/components/schemas/Position"
         workExperienceTotal:
           type: integer
+          example: 13
         workExperienceCurrent:
           type: integer
+          example: 4
 
     FinishRegistrationRequestDTO:
       type: object
@@ -239,43 +499,47 @@ components:
           $ref: "#/components/schemas/MaritalStatus"
         dependentAmount:
           type: integer
+          example: 3
         passportIssueDate:
           type: string
           format: date
+          example: 2016-04-16
         passportIssueBranch:
           type: string
+          example: 123-456
         employment:
           $ref: "#/components/schemas/EmploymentDTO"
         account:
           type: string
+          example: 0000000000000001
 
     Gender:
       type: string
       enum:
-        - male
-        - female
-        - non_binary
+        - MALE
+        - FEMALE
+        - NON_BINARY
 
     MaritalStatus:
       type: string
       enum:
-        - married
-        - divorced
-        - single
-        - widow_widower
+        - MARRIED
+        - DIVORCED
+        - SINGLE
+        - WIDOW_WIDOWER
 
     EmploymentStatus:
       type: string
       enum:
-        - unemployed
-        - self_employed
-        - employed
-        - business_owner
+        - UNEMPLOYED
+        - SELF_EMPLOYED
+        - EMPLOYED
+        - BUSINESS_OWNER
 
     Position:
       type: string
       enum:
-        - worker
-        - mid_manager
-        - top_manager
-        - owner
+        - WORKER
+        - MID_MANAGER
+        - TOP_MANAGER
+        - OWNER

@@ -173,9 +173,9 @@ components:
         gender:
           type: string
           enum:
-            - male
-            - female
-            - non_binary
+            - MALE
+            - FEMALE
+            - NON_BINARY
         birthdate:
           type: string
           format: date
@@ -197,10 +197,10 @@ components:
         maritalStatus:
           type: string
           enum:
-            - married
-            - single
-            - divorced
-            - widow_widower
+            - MARRIED
+            - SINGLE
+            - DIVORCED
+            - WIDOW_WIDOWER
         dependentAmount:
           type: integer
         employment:
@@ -255,10 +255,10 @@ components:
         employmentStatus:
           type: string
           enum:
-            - unemployed
-            - self_employed
-            - business_owner
-            - employed
+            - UNEMPLOYED
+            - SELF_EMPLOYED
+            - BUSINESS_OWNER
+            - EMPLOYED
         employerINN:
           type: string
         salary:
@@ -266,10 +266,10 @@ components:
         position:
           type: string
           enum:
-            - middle_manager
-            - top_manager
-            - worker
-            - owner
+            - MIDDLE_MANAGER
+            - TOP_MANAGER
+            - WORKER
+            - OWNER
         workExperienceTotal:
           type: integer
         workExperienceCurrent:

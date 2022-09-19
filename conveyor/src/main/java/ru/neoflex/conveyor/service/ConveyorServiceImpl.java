@@ -63,7 +63,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         log.debug("calculateCreditOffers(), создали список со всеми ранее инициализированными предложениями, loanOffers = {}", loanOffers);
 
         loanOffers = loanOffers.stream().sorted(Comparator.comparing(LoanOfferDTO::getRate).reversed()).toList();
-        log.info("calculateCreditOffers(), отсортировали список с предложениями (от хкдшего к лучшему) по ставке, return loanOffers = {}", loanOffers);
+        log.info("calculateCreditOffers(), отсортировали список с предложениями (от худшего к лучшему) по ставке, return loanOffers = {}", loanOffers);
 
         return loanOffers;
     }
@@ -346,8 +346,7 @@ public class ConveyorServiceImpl implements ConveyorService{
         }
         log.debug("calculatePsk(), расчитали значение i (составляющая формулы psk), i = {}", i);
 
-        BigDecimal psk = i.multiply(BigDecimal.valueOf(365)
-                .divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP))
+        BigDecimal psk = i.multiply(BigDecimal.valueOf(365).divide(BigDecimal.valueOf(31),10, RoundingMode.HALF_UP))
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(3, RoundingMode.HALF_UP);
         log.info("calculatePsk(), расчитали значение psk, return psk = {}", psk);

@@ -21,8 +21,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USER_NAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USER_NAME:credit.conveyor.ksu}
+    password: ${MAIL_PASSWORD:bgipduuoruqonabs}
     properties:
       mail:
         smtp:
@@ -31,9 +31,9 @@ spring:
             enable: true
 kafka:
   topics:
-    finish-registration: ${FINISH_REGISTRATION}
-    create-documents: ${CREATE_DOCUMENTS}
-    send-documents: ${SEND_DOCUMENTS}
-    send-ses: ${SEND_SES}
-    credit-issued: ${CREDIT_ISSUED}
-    application-denied: ${APPLICATION_DENIED}
+    finish-registration: ${FINISH_REGISTRATION:finish-registration}
+    create-documents: ${CREATE_DOCUMENTS:create-documents}
+    send-documents: ${SEND_DOCUMENTS:send-documents}
+    send-ses: ${SEND_SES:send-ses}
+    credit-issued: ${CREDIT_ISSUED:credit-issued}
+    application-denied: ${APPLICATION_DENIED:application-denied}

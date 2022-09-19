@@ -30,7 +30,7 @@ public class DossierServiceImpl implements DossierService{
             log.info("processFinishRegistrationEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение из топика (название топика), {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика FinishRegistration, {}: {}", e.getClass(), e.getMessage());
         }
     }
 
@@ -44,7 +44,7 @@ public class DossierServiceImpl implements DossierService{
             log.info("processCreateDocumentsEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение, {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика CreateDocuments, {}: {}", e.getClass(), e.getMessage());
         }
     }
 
@@ -66,6 +66,9 @@ public class DossierServiceImpl implements DossierService{
             File paymentSchedule = documentService.createPaymentScheduleDocument(application, emailMessage.getApplicationId());
             log.debug("processSendDocumentEvent(), сформировали paymentSchedule = {}", paymentSchedule);
 
+            dealClient.updateStatus(emailMessage.getApplicationId(), "DOCUMENT_CREATED");
+            log.debug("processCreditIssuedEvent(), отправляем запрос в Deal для изменения статуса заявки на DOCUMENT_CREATED");
+
             emailService.sendEmailWithAttachment(
                     emailMessage,
                     createTextForSendDocument(emailMessage.getApplicationId()),
@@ -73,7 +76,7 @@ public class DossierServiceImpl implements DossierService{
             log.info("processSendDocumentEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение, {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика SendDocument, {}: {}", e.getClass(), e.getMessage());
         }
     }
 
@@ -90,7 +93,7 @@ public class DossierServiceImpl implements DossierService{
             log.info("processSendSesEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение, {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика SendSes, {}: {}", e.getClass(), e.getMessage());
         }
 
     }
@@ -101,11 +104,15 @@ public class DossierServiceImpl implements DossierService{
 
         try {
             EmailMessage emailMessage = deserializeStringToEmailMessage(message);
+
+            dealClient.updateStatus(emailMessage.getApplicationId(), "CREDIT_ISSUED");
+            log.debug("processCreditIssuedEvent(), отправляем запрос в Deal для изменения статуса заявки на CREDIT_ISSUED");
+
             emailService.sendSimpleEmail(emailMessage, createTextForCreditIssued());
             log.info("processCreditIssuedEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение, {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика CreditIssued, {}: {}", e.getClass(), e.getMessage());
         }
     }
 
@@ -119,7 +126,7 @@ public class DossierServiceImpl implements DossierService{
             log.info("processApplicationDeniedEvent(), отправляем письмо клиенту, тема: {}", emailMessage.getTheme());
 
         } catch (Exception e) {
-            log.error("Ошибка при попытке обработать сообщение, {}: {}", e.getClass(), e.getMessage());
+            log.error("Ошибка при попытке обработать сообщение из топика ApplicationDenied, {}: {}", e.getClass(), e.getMessage());
         }
     }
 
@@ -171,7 +178,8 @@ public class DossierServiceImpl implements DossierService{
                 "\nПерейдите по ссылке ниже для запроса на подписание документов:" +
                 "\nhttp://localhost:8084/swagger-ui/index.html#/document/signDocumentsRequest" +
                 "\n" +
-                "\nЕсли вы хотите отклонить заявку перейдите по той же ссылке и укажите client_denied:";
+                "\nЕсли вы хотите отклонить заявку перейдите по следующей ссылке" +
+                "\nhttp://localhost:8084/swagger-ui/index.html#/document/denyOnApplication";
         log.debug("createTextForSendDocument(), return messageText = {}", messageText);
         return messageText;
     }

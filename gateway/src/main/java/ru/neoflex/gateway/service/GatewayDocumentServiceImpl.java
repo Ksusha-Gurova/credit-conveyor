@@ -12,8 +12,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class GatewayDocumentServiceImpl implements GatewayDocumentService{
+
     private final DealClient dealClient;
-    private final String CLIENT_DENIED = "client_denied";
+    private final GatewayAdminService adminService;
 
     @Override
     public void createDocumentRequest(Long applicationId) {
@@ -24,17 +25,11 @@ public class GatewayDocumentServiceImpl implements GatewayDocumentService{
     }
 
     @Override
-    public void signDocumentRequest(Long applicationId, String statusClientDenied) {
-        log.debug("signDocumentRequest(), applicationId = {}, statusClientDenied = {}", applicationId, statusClientDenied);
+    public void signDocumentRequest(Long applicationId) {
+        log.debug("signDocumentRequest(), applicationId = {}", applicationId);
 
-        if (Objects.isNull(statusClientDenied)){
             dealClient.signDocumentRequest(applicationId);
             log.info("signDocumentRequest(), отправляем запрос в MC-deal на подписание документов");
-
-        } else if (statusClientDenied.equalsIgnoreCase(CLIENT_DENIED)){
-            dealClient.applicationDenialRequest(applicationId, statusClientDenied);
-            log.info("signDocumentRequest(), отправляем запрос в MC-deal на отказ от кредита");
-        }
     }
 
     @Override
@@ -48,5 +43,13 @@ public class GatewayDocumentServiceImpl implements GatewayDocumentService{
         } catch (FeignException e){
             log.error("verifySesCodeRequest(), ошибка при обработке запроса на проверку ses-кода");
         }
+    }
+
+    @Override
+    public void denyOnApplication(Long applicationId) {
+        log.debug("denyOnApplication(), applicationId = {}", applicationId);
+
+        adminService.updateStatus(applicationId, "CLIENT_DENIED");
+        log.info("denyOnApplication(), отправляем запрос на отказ клиентом от заявки {}", applicationId);
     }
 }

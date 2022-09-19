@@ -2,6 +2,7 @@ package ru.neoflex.dossier.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.neoflex.dossier.client.dto.ApplicationDTO;
@@ -12,5 +13,5 @@ public interface DealClient {
     ApplicationDTO getApplication(@PathVariable Long applicationId);
 
     @RequestMapping(method = RequestMethod.PUT, value = "/deal/admin/application/{applicationId}/status")
-    void updateStatus(@PathVariable Long applicationId);
+    void updateStatus(@PathVariable Long applicationId, @RequestBody String status);
 }
