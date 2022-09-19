@@ -1,0 +1,34 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+application:
+  conveyorHost: ${CONVEYOR_HOST:http://localhost:8080/}
+
+spring:
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.xml
+    drop-first: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST_NAME:localhost:9093}
+
+kafka:
+  topics:
+    finish-registration: ${FINISH_REGISTRATION:finish-registration}
+    create-documents: ${CREATE_DOCUMENTS:create-documents}
+    send-documents: ${SEND_DOCUMENTS:send-documents}
+    send-ses: ${SEND_SES:send-ses}
+    credit-issued: ${CREDIT_ISSUED:credit-issued}
+    application-denied: ${APPLICATION_DENIED:application-denied}
+
+

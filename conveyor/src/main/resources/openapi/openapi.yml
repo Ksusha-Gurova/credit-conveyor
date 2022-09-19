@@ -1,0 +1,300 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Conveyor
+servers:
+  - url: localhost:8080
+paths:
+  /conveyor/offers:
+    post:
+      tags:
+        - conveyor
+      summary: расчет возможных условий кредита
+      operationId: calculateCreditOffers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanApplicationRequestDTO"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanOfferDTO"
+
+  /conveyor/calculation:
+    post:
+      tags:
+        - conveyor
+      summary: валидация присланных данных + скоринг данных + полный расчет параметров кредита
+      operationId: calculateCreditParameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScoringDataDTO"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditDTO"
+
+components:
+  schemas:
+    LoanApplicationRequestDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - email
+        - birthdate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          type: number
+          minimum: 10000
+        term:
+          type: integer
+          minimum: 6
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        email:
+          type: string
+          pattern: ^[\w\.]{2,50}@[\w\.]{2,20}
+        birthdate:
+          type: string
+          format: date
+        passportSeries:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^[0-9]+$
+        passportNumber:
+          type: string
+          minLength: 6
+          maxLength: 6
+          pattern: ^[0-9]+$
+
+    LoanOfferDTO:
+      type: object
+      required:
+        - applicationId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        applicationId:
+          type: integer
+          format: int64
+        requestedAmount:
+          type: number
+        totalAmount:
+          type: number
+        term:
+          type: integer
+        monthlyPayment:
+          type: number
+        rate:
+          type: number
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+
+    ScoringDataDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - gender
+        - birthdate
+        - passportSeries
+        - passportNumber
+        - passportIssueDate
+        - passportIssueBranch
+        - maritalStatus
+        - dependentAmount
+        - employment
+        - account
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        amount:
+          type: number
+          minimum: 10000
+        term:
+          type: integer
+          minimum: 6
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: ^[a-zA-Z]+$
+        gender:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+        birthdate:
+          type: string
+          format: date
+        passportSeries:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^[0-9]+$
+        passportNumber:
+          type: string
+          minLength: 6
+          maxLength: 6
+          pattern: ^[0-9]+$
+        passportIssueDate:
+          type: string
+          format: date
+        passportIssueBranch:
+          type: string
+        maritalStatus:
+          type: string
+          enum:
+            - MARRIED
+            - SINGLE
+            - DIVORCED
+            - WIDOW_WIDOWER
+        dependentAmount:
+          type: integer
+        employment:
+          $ref: "#/components/schemas/EmploymentDTO"
+        account:
+          type: string
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+
+    CreditDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - monthlyPayment
+        - rate
+        - psk
+        - isInsuranceEnabled
+        - isSalaryClient
+        - paymentSchedule
+      properties:
+        amount:
+          type: number
+        term:
+          type: integer
+        monthlyPayment:
+          type: number
+        rate:
+          type: number
+        psk:
+          type: number
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+        paymentSchedule:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentScheduleElement"
+
+    EmploymentDTO:
+      type: object
+      required:
+        - employmentStatus
+        - employerINN
+        - salary
+        - workExperienceTotal
+        - workExperienceCurrent
+      properties:
+        employmentStatus:
+          type: string
+          enum:
+            - UNEMPLOYED
+            - SELF_EMPLOYED
+            - BUSINESS_OWNER
+            - EMPLOYED
+        employerINN:
+          type: string
+        salary:
+          type: number
+        position:
+          type: string
+          enum:
+            - MIDDLE_MANAGER
+            - TOP_MANAGER
+            - WORKER
+            - OWNER
+        workExperienceTotal:
+          type: integer
+        workExperienceCurrent:
+          type: integer
+
+    PaymentScheduleElement:
+      type: object
+      required:
+        - number
+        - date
+        - totalPayment
+        - interestPayment
+        - debtPayment
+        - remainingDebt
+      properties:
+        number:
+          type: integer
+        date:
+          type: string
+          format: date
+        totalPayment:
+          type: number
+        interestPayment:
+          type: number
+        debtPayment:
+          type: number
+        remainingDebt:
+          type: number

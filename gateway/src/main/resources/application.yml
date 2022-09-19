@@ -1,0 +1,7 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+application:
+  dealHost: ${DEAL_HOST:http://localhost:8081/}
+  applicationHost: ${APPLICATION_HOST:http://localhost:8082/}
+

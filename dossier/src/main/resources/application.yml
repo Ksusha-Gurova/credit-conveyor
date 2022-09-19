@@ -1,0 +1,39 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+application:
+  dealHost: ${DEAL_HOST:localhost:8081/}
+
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_HOST_NAME:localhost:9093}
+      group-id: dossier
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USER_NAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+kafka:
+  topics:
+    finish-registration: ${FINISH_REGISTRATION:finish-registration}
+    create-documents: ${CREATE_DOCUMENTS:create-documents}
+    send-documents: ${SEND_DOCUMENTS:send-documents}
+    send-ses: ${SEND_SES:send-ses}
+    credit-issued: ${CREDIT_ISSUED:credit-issued}
+    application-denied: ${APPLICATION_DENIED:application-denied}
