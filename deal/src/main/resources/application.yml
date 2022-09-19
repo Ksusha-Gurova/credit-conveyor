@@ -24,11 +24,11 @@ spring:
 
 kafka:
   topics:
-    finish-registration: ${FINISH_REGISTRATION}
-    create-documents: ${CREATE_DOCUMENTS}
-    send-documents: ${SEND_DOCUMENTS}
-    send-ses: ${SEND_SES}
-    credit-issued: ${CREDIT_ISSUED}
-    application-denied: ${APPLICATION_DENIED}
+    finish-registration: ${FINISH_REGISTRATION:finish-registration}
+    create-documents: ${CREATE_DOCUMENTS:create-documents}
+    send-documents: ${SEND_DOCUMENTS:send-documents}
+    send-ses: ${SEND_SES:send-ses}
+    credit-issued: ${CREDIT_ISSUED:credit-issued}
+    application-denied: ${APPLICATION_DENIED:application-denied}
 
 

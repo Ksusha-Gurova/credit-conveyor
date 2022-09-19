@@ -21,14 +21,20 @@ public class GatewayDocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<Void> signDocumentsRequest(Long applicationId, String statusClientDenied) {
-        service.signDocumentRequest(applicationId, statusClientDenied);
+    public ResponseEntity<Void> signDocumentsRequest(Long applicationId) {
+        service.signDocumentRequest(applicationId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> verifySesCodeRequest(Long applicationId, String ses) {
         service.verifySesCodeRequest(applicationId, ses);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> denyOnApplication(Long applicationId) {
+        service.denyOnApplication(applicationId);
         return ResponseEntity.ok().build();
     }
 }

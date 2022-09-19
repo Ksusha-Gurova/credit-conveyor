@@ -6,15 +6,15 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum ApplicationStatus {
-    PREAPPROVAL("preapproval"),
-    APPROVED("approved"),
-    CC_DENIED("cc_denied"),
-    CC_APPROVED("cc_approved"),
-    PREPARE_DOCUMENTS("prepare_documents"),
-    DOCUMENT_CREATED("document_created"),
-    CLIENT_DENIED("client_denied"),
-    DOCUMENT_SIGNED("document_signed"),
-    CREDIT_ISSUED("credit_issued");
+    PREAPPROVAL("PREAPPROVAL"),
+    APPROVED("APPROVED"),
+    CC_DENIED("CC_DENIED"),
+    CC_APPROVED("CC_APPROVED"),
+    PREPARE_DOCUMENTS("PREPARE_DOCUMENTS"),
+    DOCUMENT_CREATED("DOCUMENT_CREATED"),
+    CLIENT_DENIED("CLIENT_DENIED"),
+    DOCUMENT_SIGNED("DOCUMENT_SIGNED"),
+    CREDIT_ISSUED("CREDIT_ISSUED");
 
     private final String value;
 

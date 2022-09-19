@@ -24,6 +24,7 @@ import ru.neoflex.deal.repository.EmploymentRepository;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +38,9 @@ import java.util.stream.Collectors;
 public class DealServiceImpl implements DealService{
 
     private static final int BAD_REQUEST_STATUS = 400;
-    private static final String CLIENT_DENIED = "client_denied";
-    private static final String DOCUMENTS_CREATED = "documents_created";
+    private static final String CLIENT_DENIED = "CLIENT_DENIED";
+    private static final String DOCUMENTS_CREATED = "DOCUMENTS_CREATED";
+    private static final String CREDIT_ISSUED = "CREDIT_ISSUED";
 
     private final ApplicationRepository applicationRepository;
     private final ClientRepository clientRepository;
@@ -60,6 +62,34 @@ public class DealServiceImpl implements DealService{
     @Value("${kafka.topics.application-denied}") private String topicApplicationDenied;
 
     @Override
+    public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+        Client client = clientRepository.save(clientMapper.mapDtoToEntity(loanApplicationRequestDTO));
+        log.debug("calculateCreditOffers(), создается объект Client и сохраняется в базу, client = {}", client);
+
+        Application application = applicationMapper.mapDtoToEntity(loanApplicationRequestDTO, client);
+        application.setStatus(ApplicationStatus.PREAPPROVAL);
+        if (application.getStatusHistory() == null){
+            application.setStatusHistory(new ArrayList<>());
+            log.debug("applyOffer(), инициализируется новый список statusHistory");
+        }
+        application.getStatusHistory()
+                .add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
+        Application savedApplication = applicationRepository.save(application);
+        log.debug("calculateCreditOffers(), создается объект Application и сохраняется в базу, application = {}", application);
+
+        List<LoanOfferDTO> loanOffers;
+
+        loanOffers = conveyorClient.getLoanOffers(loanApplicationRequestDTO);
+        log.debug("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
+
+        loanOffers.forEach(offer -> offer.setApplicationId(savedApplication.getId()));
+        log.debug("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
+
+        log.info("calculateCreditOffers(), return loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
+        return loanOffers;
+    }
+
+    @Override
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
         log.debug("applyOffer(), loanOfferDTO = {}", loanOfferDTO);
 
@@ -68,10 +98,6 @@ public class DealServiceImpl implements DealService{
         log.debug("applyOffer(), из базы достается заявка по id из loanOfferDTO, application = {}", application);
 
         application.setStatus(ApplicationStatus.APPROVED);
-        if (application.getStatusHistory() == null){
-            application.setStatusHistory(new ArrayList<>());
-            log.debug("applyOffer(), инициализируется новый список statusHistory");
-        }
         application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
         log.debug("applyOffer(), в список добавляется новый объект, statusHistory = {}", application.getStatusHistory());
 
@@ -126,7 +152,7 @@ public class DealServiceImpl implements DealService{
         log.debug("calculateCredit(), создается объект employment с данными из finishRegistrationRequestDTO и сохраняется в базу, " +
                 "employment = {}", employment);
 
-        application.getClient().setGender(finishRegistrationRequestDTO.getGender().getValue());
+        application.getClient().setGender(finishRegistrationRequestDTO.getGender().toString());
         application.getClient().getPassport().setIssueDate(finishRegistrationRequestDTO.getPassportIssueDate());
         application.getClient().getPassport().setIssueBranch(finishRegistrationRequestDTO.getPassportIssueBranch());
         application.getClient().setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus().getValue());
@@ -171,26 +197,6 @@ public class DealServiceImpl implements DealService{
     }
 
     @Override
-    public List<LoanOfferDTO> calculateCreditOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) {
-        Client client = clientRepository.save(clientMapper.mapDtoToEntity(loanApplicationRequestDTO));
-        log.debug("calculateCreditOffers(), создается объект Client и сохраняется в базу, client = {}", client);
-
-        Application application = applicationRepository.save(applicationMapper.mapDtoToEntity(loanApplicationRequestDTO, client));
-        log.debug("calculateCreditOffers(), создается объект Application и сохраняется в базу, application = {}", application);
-
-        List<LoanOfferDTO> loanOffers;
-
-            loanOffers = conveyorClient.getLoanOffers(loanApplicationRequestDTO);
-            log.debug("calculateCreditOffers(), отправляется запрос /conveyor/offers, ответ присваивается List<LoanOfferDTO> loanOffers = {}", loanOffers);
-
-            loanOffers.forEach(offer -> offer.setApplicationId(application.getId()));
-            log.debug("calculateCreditOffers(), всем кредитным предложениям в списке присваивается id ранее созданной заявки, return loanOffers = {}", loanOffers);
-
-        log.info("calculateCreditOffers(), return loanApplicationRequestDTO = {}", loanApplicationRequestDTO);
-        return loanOffers;
-    }
-
-    @Override
     public void sendDocuments(Long applicationId) {
         log.debug("sendDocuments(), applicationId = {}", applicationId);
 
@@ -201,7 +207,7 @@ public class DealServiceImpl implements DealService{
         application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
         application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
         applicationRepository.save(application);
-        log.debug("sendDocuments(), обновляем в заявке статус и историю статусов, сохраняемв базу обновленную application = {}", application);
+        log.debug("sendDocuments(), обновляем в заявке статус и историю статусов, сохраняем в базу обновленную application = {}", application);
 
         EmailMessage sendDocumentsEmailDTO = EmailMessage.builder()
                 .address(application.getClient().getEmail())
@@ -218,7 +224,11 @@ public class DealServiceImpl implements DealService{
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
-        log.debug("signDocuments(), подгружаеем из базы application = {}", application);
+        log.debug("signDocuments(), подгружаем из базы application = {}", application);
+
+        if (application.getStatus().equals(ApplicationStatus.CLIENT_DENIED)){
+            throw new IllegalArgumentException("Ранее вы отклонили заявку. Дальнейшая обработка заявки невозможна!");
+        }
 
         String sesCode = String.format("%04d", random.nextInt(10000));
         application.setSesCode(sesCode);
@@ -240,11 +250,12 @@ public class DealServiceImpl implements DealService{
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
-        log.debug("signDocumentsSesCode(), подгружаеем из базы application = {}", application);
+        log.debug("signDocumentsSesCode(), подгружаем из базы application = {}", application);
 
         if (application.getSesCode().equals(sesCode)){
             application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
             application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
+            application.setSignDate(LocalDate.now());
             applicationRepository.save(application);
             log.debug("signDocumentsSesCode(), обновляем статус заявки на DOCUMENT_SIGNED, " +
                     "обновляем историю статусов, " +
@@ -281,15 +292,36 @@ public class DealServiceImpl implements DealService{
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("В базе нет заявки с id = " + applicationId));
-        log.debug("updateStatus(), подгружаеем из базы, application = {}", application);
+        log.debug("updateStatus(), подгружаем из базы, application = {}", application);
 
-        if (status.equalsIgnoreCase(DOCUMENTS_CREATED)){
+        if (status.equalsIgnoreCase(DOCUMENTS_CREATED)) {
             application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
-            log.debug("updateStatus(), обновляем статус заявки");
+            application.getStatusHistory()
+                    .add(ApplicationStatusHistoryDTO.builder()
+                            .status(ApplicationStatus.DOCUMENT_CREATED)
+                            .changeType(ChangeType.AUTOMATIC)
+                            .time(LocalDateTime.now())
+                            .build());
+            log.debug("updateStatus(), обновляем статус заявки на {} и историю изменения статусов", DOCUMENTS_CREATED);
+        } else if (status.equalsIgnoreCase(CREDIT_ISSUED)){
+            application.setStatus(ApplicationStatus.CREDIT_ISSUED);
+            application.getStatusHistory()
+                    .add(ApplicationStatusHistoryDTO.builder()
+                            .status(ApplicationStatus.CREDIT_ISSUED)
+                            .changeType(ChangeType.AUTOMATIC)
+                            .time(LocalDateTime.now())
+                            .build());
+            log.debug("updateStatus(), обновляем статус заявки на {} и историю изменения статусов", CREDIT_ISSUED);
 
         } else if (status.equalsIgnoreCase(CLIENT_DENIED)){
             application.setStatus(ApplicationStatus.CLIENT_DENIED);
-            log.debug("updateStatus(), обновляем статус заявки");
+            application.getStatusHistory()
+                    .add(ApplicationStatusHistoryDTO.builder()
+                            .status(ApplicationStatus.CLIENT_DENIED)
+                            .changeType(ChangeType.MANUAL)
+                            .time(LocalDateTime.now())
+                            .build());
+            log.debug("updateStatus(), обновляем статус заявки на {} и историю изменения статусов", CLIENT_DENIED);
 
             EmailMessage applicationDeniedEmailDTO = EmailMessage.builder()
                     .address(application.getClient().getEmail())
@@ -299,7 +331,6 @@ public class DealServiceImpl implements DealService{
             kafkaClient.send(topicApplicationDenied, applicationDeniedEmailDTO);
             log.info("updateStatus(), отправляем по kafka applicationDeniedEmailDTO = {}", applicationDeniedEmailDTO);
         }
-        application.getStatusHistory().add(new ApplicationStatusHistoryDTO(application.getStatus(), LocalDateTime.now(),ChangeType.AUTOMATIC));
         applicationRepository.save(application);
         log.debug("updateStatus(), обновляем историю статуса, сохраняем все изменения в базу, application = {}", application);
     }

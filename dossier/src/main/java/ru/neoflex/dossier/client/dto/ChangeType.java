@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum ChangeType {
-    AUTOMATIC("automatic"),
-    MANUAL("manual");
+    AUTOMATIC("AUTOMATIC"),
+    MANUAL("MANUAL");
 
     private String value;
     @JsonValue

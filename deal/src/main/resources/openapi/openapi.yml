@@ -584,55 +584,55 @@ components:
     Gender:
       type: string
       enum:
-        - male
-        - female
-        - non_binary
+        - MALE
+        - FEMALE
+        - NON_BINARY
 
     MaritalStatus:
       type: string
       enum:
-        - married
-        - divorced
-        - single
-        - widow_widower
+        - MARRIED
+        - DIVORCED
+        - SINGLE
+        - WIDOW_WIDOWER
 
     EmploymentStatus:
       type: string
       enum:
-        - unemployed
-        - self_employed
-        - employed
-        - business_owner
+        - UNEMPLOYED
+        - SELF_EMPLOYED
+        - EMPLOYED
+        - BUSINESS_OWNER
 
     Position:
       type: string
       enum:
-        - worker
-        - mid_manager
-        - top_manager
-        - owner
+        - WORKER
+        - MID_MANAGER
+        - TOP_MANAGER
+        - OWNER
 
     ApplicationStatus:
       type: string
       enum:
-        - preapproval
-        - approved
-        - cc_denied
-        - cc_approved
-        - prepare_documents
-        - document_created
-        - client_denied
-        - document_signed
-        - credit_issued
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
 
     CreditStatus:
       type: string
       enum:
-        - calculated
-        - issued
+        - CALCULATED
+        - ISSUED
 
     ChangeType:
       type: string
       enum:
-        - automatic
-        - manual
+        - AUTOMATIC
+        - MANUAL
